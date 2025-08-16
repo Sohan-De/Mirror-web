@@ -30,7 +30,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     setupFormValidation();
     setupPaymentMethodToggle();
     setupCryptoPayments();
-    updateButtonText('Pay Now');
+    
+    // Update button text based on plan type
+    if (currentPackage && currentPackage.price === 0) {
+        updateButtonText('Get Free Plan');
+    } else {
+        updateButtonText('Pay Now');
+    }
     
     // Show checkout form directly
     showCheckoutForm();
@@ -50,14 +56,14 @@ const mockPackages = {
     'pro': {
         id: 'pro',
         name: 'Pro',
-        price: 9.99,
+        price: 29.99,
         billing_cycle: 'monthly',
         features: ['Advanced screen sharing', 'Up to 10 devices', '1080p resolution', 'Recording feature', 'Priority support', 'Custom branding']
     },
     'business': {
         id: 'business',
         name: 'Business',
-        price: 29.99,
+        price: 99.99,
         billing_cycle: 'monthly',
         features: ['Premium screen sharing', 'Unlimited devices', '4K resolution', 'Recording & editing features', 'Priority support', 'Custom branding', 'Analytics dashboard', 'Team management']
     }
@@ -81,12 +87,22 @@ async function loadPackageFromURL() {
         let packageData = mockPackages[packageId.toLowerCase()];
         console.log('Looking for package:', packageId.toLowerCase());
         console.log('Available mock packages:', Object.keys(mockPackages));
+        console.log('Mock packages data:', mockPackages);
         
         if (!packageData) {
             // If not found in mock data, try to parse as UUID and use default
             packageData = mockPackages['pro']; // Default to Pro plan
             console.log('Package not found in mock data, using default Pro plan');
         }
+        
+        // Special handling for Pro plan to ensure correct price
+        if (packageId.toLowerCase() === 'pro') {
+            packageData = mockPackages['pro'];
+            console.log('Pro plan detected, ensuring correct price:', packageData.price);
+        }
+        
+        console.log('Selected package data:', packageData);
+        console.log('Package price:', packageData.price);
         
         currentPackage = packageData;
         console.log('Loaded package:', currentPackage);
@@ -126,6 +142,7 @@ function updatePackageDisplay() {
     const priceAmount = document.getElementById('price-amount');
     if (priceAmount) {
         priceAmount.textContent = `$${currentPackage.price}`;
+        console.log('Updated price display to:', `$${currentPackage.price}`);
     }
     
     // Update billing period
@@ -183,6 +200,10 @@ function updateTotals() {
     const tax = 0; // No tax for now
     const total = subtotal + tax;
     
+    console.log('Updating totals - Package price:', currentPackage.price);
+    console.log('Calculated subtotal:', subtotal);
+    console.log('Calculated total:', total);
+    
     // Update subtotal
     const subtotalElement = document.getElementById('subtotal');
     if (subtotalElement) {
@@ -210,7 +231,14 @@ function initializeStripe() {
             throw new Error('Stripe library not loaded');
         }
         
-        // Create card element with proper styling
+        // Check if this is a free plan
+        if (currentPackage && currentPackage.price === 0) {
+            console.log('Free plan detected, skipping Stripe initialization');
+            showFreePlanCheckout();
+            return;
+        }
+        
+        // Create card element with proper styling for paid plans
         elements = stripe.elements({
             mode: 'payment',
             amount: currentPackage ? Math.round(currentPackage.price * 100) : 999,
@@ -283,6 +311,111 @@ function initializeStripe() {
     }
 }
 
+// Show free plan checkout (no payment required)
+function showFreePlanCheckout() {
+    console.log('Setting up free plan checkout');
+    
+    // Hide payment-related elements
+    const paymentSection = document.querySelector('.payment-section');
+    const cardElement = document.getElementById('card-element');
+    const paymentMethods = document.querySelector('.payment-methods');
+    const cryptoSection = document.querySelector('.crypto-section');
+    
+    if (paymentSection) paymentSection.style.display = 'none';
+    if (cardElement) cardElement.style.display = 'none';
+    if (paymentMethods) paymentMethods.style.display = 'none';
+    if (cryptoSection) cryptoSection.style.display = 'none';
+    
+    // Show free plan message
+    const checkoutForm = document.querySelector('.checkout-form');
+    if (checkoutForm) {
+        const freeMessage = document.createElement('div');
+        freeMessage.className = 'free-plan-message';
+        freeMessage.innerHTML = `
+            <div class="free-plan-content">
+                <div class="free-plan-icon">🎉</div>
+                <h3>Free Plan Selected!</h3>
+                <p>You've selected the free plan. No payment information is required.</p>
+                <div class="free-plan-features">
+                    <h4>Your Free Plan Includes:</h4>
+                    <ul>
+                        ${currentPackage.features.map(feature => `<li>✓ ${feature}</li>`).join('')}
+                    </ul>
+                </div>
+                <div class="free-plan-note">
+                    <p><strong>Note:</strong> You can upgrade to a paid plan anytime to unlock additional features.</p>
+                </div>
+            </div>
+        `;
+        
+        // Insert the message before the form
+        checkoutForm.insertBefore(freeMessage, checkoutForm.firstChild);
+    }
+    
+    // Update button text and behavior
+    updateButtonText('Get Free Plan');
+    
+    // Update form validation to not require payment method
+    const submitButton = document.getElementById('submit-button');
+    if (submitButton) {
+        submitButton.onclick = handleFreePlanSubmission;
+    }
+}
+
+// Handle free plan submission
+async function handleFreePlanSubmission() {
+    if (!currentPackage) {
+        showError('Missing package information. Please refresh the page.');
+        return;
+    }
+    
+    try {
+        // Show loading state
+        showLoading(true);
+        updateButtonText('Processing...');
+        
+        // Validate basic form (email, name, terms)
+        if (!validateBasicForm()) {
+            showLoading(false);
+            updateButtonText('Get Free Plan');
+            return;
+        }
+        
+        // Simulate processing delay
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Update user subscription (free plan)
+        await updateUserSubscription({ id: 'free_' + Math.random().toString(36).substr(2, 9), status: 'succeeded' });
+        showSuccess();
+        
+    } catch (error) {
+        console.error('Free plan submission error:', error);
+        showError(error.message || 'Failed to activate free plan. Please try again.');
+    } finally {
+        showLoading(false);
+        updateButtonText('Get Free Plan');
+    }
+}
+
+// Validate basic form (without payment requirements)
+function validateBasicForm() {
+    const email = document.getElementById('email').value;
+    const name = document.getElementById('name').value;
+    const terms = document.getElementById('terms').checked;
+    
+    if (!email || !name || !terms) {
+        showError('Please fill in all required fields and accept the terms.');
+        return false;
+    }
+    
+    if (!isValidEmail(email)) {
+        showError('Please enter a valid email address.');
+        return false;
+    }
+    
+    return true;
+}
+
 // Set up form validation
 function setupFormValidation() {
     const form = document.querySelector('.checkout-form');
@@ -311,6 +444,12 @@ function setupFormValidation() {
 async function handlePayment() {
     if (!currentPackage) {
         showError('Missing package information. Please refresh the page.');
+        return;
+    }
+    
+    // Check if this is a free plan
+    if (currentPackage.price === 0) {
+        await handleFreePlanSubmission();
         return;
     }
     
