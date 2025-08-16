@@ -529,128 +529,120 @@ function initializeLoader() {
         let animation = null;
         let animationLoaded = false;
         
-        // Embedded icon.json data to avoid file path issues
-        const iconAnimationData = {
-            "v": "4.8.0",
-            "meta": {"g": "LottieFiles AE 3.1.1", "a": "", "k": "", "d": "", "tc": ""},
-            "fr": 20,
+        // Simple, reliable Lottie animation data
+        const simpleAnimationData = {
+            "v": "5.7.4",
+            "fr": 30,
             "ip": 0,
-            "op": 55,
-            "w": 1920,
-            "h": 1080,
-            "nm": "Comp 1",
+            "op": 60,
+            "w": 200,
+            "h": 200,
+            "nm": "Simple Loader",
             "ddd": 0,
-            "assets": [
-                {
-                    "id": "image_0",
-                    "w": 99,
-                    "h": 99,
-                    "u": "",
-                    "p": "data:image/png;base64,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",
-                    "e": 1
-                }
-            ],
+            "assets": [],
             "layers": [
                 {
                     "ddd": 0,
                     "ind": 1,
-                    "ty": 2,
-                    "nm": "Layer 2",
-                    "refId": "image_0",
+                    "ty": 4,
+                    "nm": "Circle",
                     "sr": 1,
                     "ks": {
-                        "o": {"a": 0, "k": 100, "ix": 11},
-                        "r": {"a": 0, "k": 0, "ix": 10},
-                        "p": {"a": 0, "k": [1033.918, 473.786, 0], "ix": 2},
-                        "a": {"a": 0, "k": [49.177, 49.178, 0], "ix": 1},
-                        "s": {
-                            "a": 1,
-                            "k": [
-                                {"i": {"x": [0.667, 0.667, 0.667], "y": [1, 1, 1]}, "o": {"x": [0.333, 0.333, 0.333], "y": [0, 0, 0]}, "t": 0, "s": [0, 0, 100]},
-                                {"i": {"x": [0.667, 0.667, 0.667], "y": [1, 1, 1]}, "o": {"x": [0.333, 0.333, 0.333], "y": [0, 0, 0]}, "t": 8, "s": [100, 100, 100]},
-                                {"i": {"x": [0.667, 0.667, 0.667], "y": [1, 1, 1]}, "o": {"x": [0.333, 0.333, 0.333], "y": [0, 0, 0]}, "t": 47, "s": [100, 100, 100]},
-                                {"t": 54, "s": [0, 0, 100]}
-                            ],
-                            "ix": 6
-                        }
+                        "o": {"a": 0, "k": 100},
+                        "r": {"a": 1, "k": [{"t": 0, "s": [0], "h": 0}, {"t": 60, "s": [360], "h": 0}]},
+                        "p": {"a": 0, "k": [100, 100, 0]},
+                        "a": {"a": 0, "k": [0, 0, 0]},
+                        "s": {"a": 0, "k": [100, 100, 100]}
                     },
                     "ao": 0,
+                    "shapes": [
+                        {
+                            "ty": "gr",
+                            "it": [
+                                {
+                                    "d": 1,
+                                    "ty": "el",
+                                    "s": {"a": 0, "k": [80, 80]},
+                                    "p": {"a": 0, "k": [0, 0]},
+                                    "nm": "Ellipse Path 1",
+                                    "mn": "ADBE Vector Shape - Ellipse",
+                                    "hd": false
+                                },
+                                {
+                                    "ty": "st",
+                                    "c": {"a": 0, "k": [0, 0.831, 1, 1]},
+                                    "o": {"a": 0, "k": 100},
+                                    "w": {"a": 0, "k": 8},
+                                    "lc": 2,
+                                    "lj": 1,
+                                    "ml": 4,
+                                    "hd": false
+                                },
+                                {
+                                    "ty": "tr",
+                                    "p": {"a": 0, "k": [0, 0], "ix": 2},
+                                    "a": {"a": 0, "k": [0, 0], "ix": 1},
+                                    "s": {"a": 0, "k": [100, 100], "ix": 3},
+                                    "r": {"a": 0, "k": 0, "ix": 6},
+                                    "o": {"a": 0, "k": 100, "ix": 7},
+                                    "sk": {"a": 0, "k": 0, "ix": 4},
+                                    "sa": {"a": 0, "k": 0, "ix": 5},
+                                    "nm": "Transform"
+                                }
+                            ],
+                            "nm": "Ellipse 1",
+                            "np": 3,
+                            "cix": 2,
+                            "bm": 0,
+                            "ix": 1,
+                            "mn": "ADBE Vector Group",
+                            "hd": false
+                        }
+                    ],
                     "ip": 0,
-                    "op": 418,
-                    "st": 7,
+                    "op": 60,
+                    "st": 0,
                     "bm": 0
                 }
-            ],
-            "markers": []
+            ]
         };
         
-        // Try to load the embedded animation data first
+        // Try to load the simple embedded animation
         try {
-            console.log('Loading embedded Lottie animation data');
+            console.log('Attempting to load simple embedded Lottie animation');
+            
+            // Check if Lottie library is available
+            if (typeof lottie === 'undefined') {
+                console.error('Lottie library not available');
+                fallbackToCSSAnimation();
+                return;
+            }
+            
+            // Create animation with embedded data
             animation = lottie.loadAnimation({
                 container: lottieContainer,
                 renderer: 'svg',
                 loop: true,
                 autoplay: true,
-                animationData: iconAnimationData
+                animationData: simpleAnimationData
             });
             
             // Handle animation load
             animation.addEventListener('DOMLoaded', function() {
-                console.log('Embedded Lottie animation loaded successfully');
+                console.log('Simple Lottie animation loaded successfully');
                 animationLoaded = true;
             });
             
             // Handle animation errors
             animation.addEventListener('error', function(error) {
-                console.error('Embedded animation error:', error);
-                tryExternalFile();
+                console.error('Simple animation error:', error);
+                fallbackToCSSAnimation();
             });
             
         } catch (error) {
-            console.error('Failed to load embedded animation:', error);
-            tryExternalFile();
+            console.error('Failed to load simple animation:', error);
+            fallbackToCSSAnimation();
         }
-        
-        // Fallback to external file if embedded fails
-        function tryExternalFile() {
-            try {
-                console.log('Trying external icon.json file');
-                if (animation) {
-                    animation.destroy();
-                }
-                
-                animation = lottie.loadAnimation({
-                    container: lottieContainer,
-                    renderer: 'svg',
-                    loop: true,
-                    autoplay: true,
-                    path: './icon.json'
-                });
-                
-                animation.addEventListener('DOMLoaded', function() {
-                    console.log('External Lottie animation loaded successfully');
-                    animationLoaded = true;
-                });
-                
-                animation.addEventListener('error', function(error) {
-                    console.error('External animation error:', error);
-                    fallbackToCSSAnimation();
-                });
-                
-            } catch (error) {
-                console.error('Failed to load external animation:', error);
-                fallbackToCSSAnimation();
-            }
-        }
-        
-        // Set a timeout to fallback if animation doesn't load
-        setTimeout(() => {
-            if (!animationLoaded) {
-                console.warn('Lottie animation failed to load within 3 seconds, using fallback');
-                fallbackToCSSAnimation();
-            }
-        }, 3000);
         
         // Fallback to CSS animation if Lottie fails
         function fallbackToCSSAnimation() {
@@ -664,6 +656,14 @@ function initializeLoader() {
                 `;
             }
         }
+        
+        // Set a timeout to fallback if animation doesn't load
+        setTimeout(() => {
+            if (!animationLoaded) {
+                console.warn('Lottie animation failed to load within 2 seconds, using fallback');
+                fallbackToCSSAnimation();
+            }
+        }, 2000);
         
         // Simulate loading time
         setTimeout(() => {
