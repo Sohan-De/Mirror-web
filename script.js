@@ -526,150 +526,81 @@ function initializeLoader() {
     });
     
     if (loaderOverlay && mainContent && lottieContainer) {
+        // Load and play Lottie animation (only for loader)
+        // Try multiple paths to ensure compatibility with different hosting environments
+        const animationPaths = [
+            'Icon.json',
+            './Icon.json',
+            '/Icon.json',
+            'Icon.json'
+        ];
+        
+        let currentPathIndex = 0;
         let animation = null;
-        let animationLoaded = false;
         
-        // Simple, reliable Lottie animation data
-        const simpleAnimationData = {
-            "v": "5.7.4",
-            "fr": 30,
-            "ip": 0,
-            "op": 60,
-            "w": 200,
-            "h": 200,
-            "nm": "Simple Loader",
-            "ddd": 0,
-            "assets": [],
-            "layers": [
-                {
-                    "ddd": 0,
-                    "ind": 1,
-                    "ty": 4,
-                    "nm": "Circle",
-                    "sr": 1,
-                    "ks": {
-                        "o": {"a": 0, "k": 100},
-                        "r": {"a": 1, "k": [{"t": 0, "s": [0], "h": 0}, {"t": 60, "s": [360], "h": 0}]},
-                        "p": {"a": 0, "k": [100, 100, 0]},
-                        "a": {"a": 0, "k": [0, 0, 0]},
-                        "s": {"a": 0, "k": [100, 100, 100]}
-                    },
-                    "ao": 0,
-                    "shapes": [
-                        {
-                            "ty": "gr",
-                            "it": [
-                                {
-                                    "d": 1,
-                                    "ty": "el",
-                                    "s": {"a": 0, "k": [80, 80]},
-                                    "p": {"a": 0, "k": [0, 0]},
-                                    "nm": "Ellipse Path 1",
-                                    "mn": "ADBE Vector Shape - Ellipse",
-                                    "hd": false
-                                },
-                                {
-                                    "ty": "st",
-                                    "c": {"a": 0, "k": [0, 0.831, 1, 1]},
-                                    "o": {"a": 0, "k": 100},
-                                    "w": {"a": 0, "k": 8},
-                                    "lc": 2,
-                                    "lj": 1,
-                                    "ml": 4,
-                                    "hd": false
-                                },
-                                {
-                                    "ty": "tr",
-                                    "p": {"a": 0, "k": [0, 0], "ix": 2},
-                                    "a": {"a": 0, "k": [0, 0], "ix": 1},
-                                    "s": {"a": 0, "k": [100, 100], "ix": 3},
-                                    "r": {"a": 0, "k": 0, "ix": 6},
-                                    "o": {"a": 0, "k": 100, "ix": 7},
-                                    "sk": {"a": 0, "k": 0, "ix": 4},
-                                    "sa": {"a": 0, "k": 0, "ix": 5},
-                                    "nm": "Transform"
-                                }
-                            ],
-                            "nm": "Ellipse 1",
-                            "np": 3,
-                            "cix": 2,
-                            "bm": 0,
-                            "ix": 1,
-                            "mn": "ADBE Vector Group",
-                            "hd": false
-                        }
-                    ],
-                    "ip": 0,
-                    "op": 60,
-                    "st": 0,
-                    "bm": 0
-                }
-            ]
-        };
-        
-        // Try to load the simple embedded animation
-        try {
-            console.log('Attempting to load simple embedded Lottie animation');
-            
-            // Check if Lottie library is available
-            if (typeof lottie === 'undefined') {
-                console.error('Lottie library not available');
-                fallbackToCSSAnimation();
+        function tryLoadAnimation() {
+            if (currentPathIndex >= animationPaths.length) {
+                // All paths failed, show fallback spinner
+                console.error('All animation paths failed, showing fallback spinner');
+                lottieContainer.innerHTML = '<div class="loading-spinner">🔄</div>';
                 return;
             }
             
-            // Create animation with embedded data
+            const currentPath = animationPaths[currentPathIndex];
+            console.log(`Trying to load animation from: ${currentPath}`);
+            
             animation = lottie.loadAnimation({
                 container: lottieContainer,
                 renderer: 'svg',
                 loop: true,
                 autoplay: true,
-                animationData: simpleAnimationData
+                path: currentPath
             });
             
-            // Handle animation load
             animation.addEventListener('DOMLoaded', function() {
-                console.log('Simple Lottie animation loaded successfully');
-                animationLoaded = true;
+                console.log(`Lottie animation loaded successfully from: ${currentPath}`);
             });
             
-            // Handle animation errors
             animation.addEventListener('error', function(error) {
-                console.error('Simple animation error:', error);
-                fallbackToCSSAnimation();
+                console.error(`Animation failed to load from: ${currentPath}`, error);
+                currentPathIndex++;
+                tryLoadAnimation();
             });
+        }
+        
+        // Start trying to load the animation
+        tryLoadAnimation();
+        
+        // Fallback: If Lottie library is not available, show CSS spinner
+        if (typeof lottie === 'undefined') {
+            console.warn('Lottie library not available, showing CSS spinner');
+            lottieContainer.innerHTML = '<div class="loading-spinner">🔄</div>';
+        } else {
+            console.log('✅ Lottie library is available');
+        }
+        
+        // Animation event listeners are now handled in tryLoadAnimation function
+        
+        // Debug: Check if files exist
+        console.log('Checking file availability...');
+        fetch('Icon.json')
+            .then(response => {
+                if (response.ok) {
+                    console.log('✅ Icon.json is accessible');
+                } else {
+                    console.log('❌ Icon.json not accessible:', response.status);
+                }
+            })
+            .catch(error => {
+                console.log('❌ Error checking Icon.json:', error);
+            });
+        
+        // Simulate loading time with fallback
+        const loadingTimeout = setTimeout(() => {
+            console.log('Loading timeout reached, proceeding to main content');
             
-        } catch (error) {
-            console.error('Failed to load simple animation:', error);
-            fallbackToCSSAnimation();
-        }
-        
-        // Fallback to CSS animation if Lottie fails
-        function fallbackToCSSAnimation() {
-            console.log('Using CSS fallback animation');
-            if (lottieContainer) {
-                lottieContainer.innerHTML = `
-                    <div class="fallback-loader">
-                        <div class="spinner-ring"></div>
-                        <div class="loading-text">Loading...</div>
-                    </div>
-                `;
-            }
-        }
-        
-        // Set a timeout to fallback if animation doesn't load
-        setTimeout(() => {
-            if (!animationLoaded) {
-                console.warn('Lottie animation failed to load within 2 seconds, using fallback');
-                fallbackToCSSAnimation();
-            }
-        }, 2000);
-        
-        // Simulate loading time
-        setTimeout(() => {
-            console.log('Loader timeout reached, transitioning to main content');
             // Stop the animation if it exists
-            if (animation && animationLoaded) {
+            if (animation && typeof animation.stop === 'function') {
                 animation.stop();
             }
             
@@ -689,8 +620,20 @@ function initializeLoader() {
                 // while the loader background is hidden
             }, 500);
         }, 4193);
-    } else {
-        console.error('Required loader elements not found');
+        
+        // Also add a shorter timeout as backup in case of issues
+        setTimeout(() => {
+            if (loaderOverlay.style.display !== 'none') {
+                console.log('Backup timeout reached, forcing loader to proceed');
+                clearTimeout(loadingTimeout);
+                
+                // Force show main content
+                loaderOverlay.style.display = 'none';
+                mainContent.classList.remove('hidden');
+                mainContent.style.opacity = '1';
+                mainContent.style.transform = 'translateY(0)';
+            }
+        }, 6000); // 6 seconds backup timeout
     } 
 }
 
