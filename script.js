@@ -519,119 +519,31 @@ function initializeLoader() {
     const lottieContainer = document.getElementById('lottie-container');
     
     if (loaderOverlay && mainContent && lottieContainer) {
-        console.log('Initializing loader...');
+        // Load and play Lottie animation (only for loader)
+        const animation = lottie.loadAnimation({
+            container: lottieContainer,
+            renderer: 'svg',
+            loop: true,
+            autoplay: true,
+            path: 'icon.json' // Path to your Lottie JSON file
+        });
         
-        // Show fallback spinner immediately
-        lottieContainer.innerHTML = `
-            <div class="css-loader-container">
-                <div class="css-loader"></div>
-                <div class="css-loader-text">Loading Mirror Web...</div>
-            </div>
-        `;
+        // Handle animation load
+        animation.addEventListener('DOMLoaded', function() {
+            console.log('Lottie animation loaded successfully');
+        });
         
-        // Try to load Lottie animation
-        let animation = null;
-        try {
-            // Check if Lottie library is available
-            if (typeof lottie !== 'undefined') {
-                console.log('Lottie library available, attempting to load animation...');
-                
-                // Try multiple paths for the Lottie file
-                const possiblePaths = [
-                    './icon.json',
-                    '/icon.json',
-                    'icon.json',
-                    './Lottie.json',
-                    '/Lottie.json',
-                    'Lottie.json'
-                ];
-                
-                let animationLoaded = false;
-                
-                for (const path of possiblePaths) {
-                    try {
-                        console.log('Trying Lottie path:', path);
-                        animation = lottie.loadAnimation({
-                            container: lottieContainer,
-                            renderer: 'svg',
-                            loop: true,
-                            autoplay: true,
-                            path: path
-                        });
-                        
-                        // Handle animation load
-                        animation.addEventListener('DOMLoaded', function() {
-                            console.log('Lottie animation loaded successfully from:', path);
-                            animationLoaded = true;
-                            // Clear the fallback spinner
-                            lottieContainer.innerHTML = '';
-                        });
-                        
-                        // Handle animation errors
-                        animation.addEventListener('error', function(error) {
-                            console.error('Lottie animation error for path:', path, error);
-                            if (!animationLoaded) {
-                                // Only show fallback if no animation was loaded
-                                lottieContainer.innerHTML = `
-                                    <div class="css-loader-container">
-                                        <div class="css-loader"></div>
-                                        <div class="css-loader-text">Loading Mirror Web...</div>
-                                    </div>
-                                `;
-                            }
-                        });
-                        
-                        // If we get here without error, break the loop
-                        break;
-                        
-                    } catch (pathError) {
-                        console.warn('Failed to load from path:', path, pathError);
-                        continue;
-                    }
-                }
-                
-                // If no animation was loaded, ensure fallback is shown
-                if (!animation) {
-                    console.warn('No Lottie animation could be loaded, using fallback spinner');
-                    lottieContainer.innerHTML = `
-                        <div class="css-loader-container">
-                            <div class="css-loader"></div>
-                            <div class="css-loader-text">Loading Mirror Web...</div>
-                        </div>
-                    `;
-                }
-                
-            } else {
-                console.warn('Lottie library not available, using fallback spinner');
-                lottieContainer.innerHTML = `
-                    <div class="css-loader-container">
-                        <div class="css-loader"></div>
-                        <div class="css-loader-text">Loading Mirror Web...</div>
-                    </div>
-                `;
-            }
-            
-        } catch (error) {
-            console.error('Error initializing Lottie animation:', error);
-            // Ensure fallback is shown
-            lottieContainer.innerHTML = `
-                <div class="css-loader-container">
-                    <div class="css-loader"></div>
-                    <div class="css-loader-text">Loading Mirror Web...</div>
-                </div>
-            `;
-        }
+        // Handle animation errors
+        animation.addEventListener('error', function(error) {
+            console.error('Lottie animation error:', error);
+            // Fallback to simple spinner if Lottie fails
+            lottieContainer.innerHTML = '<div class="loading-spinner">🔄</div>';
+        });
         
         // Simulate loading time
         setTimeout(() => {
-            // Stop the animation if it exists
-            if (animation && animation.stop) {
-                try {
-                    animation.stop();
-                } catch (e) {
-                    console.warn('Error stopping animation:', e);
-                }
-            }
+            // Stop the animation
+            animation.stop();
             
             // Fade out loader
             loaderOverlay.style.opacity = '0';
@@ -649,9 +561,7 @@ function initializeLoader() {
                 // while the loader background is hidden
             }, 500);
         }, 4193);
-    } else {
-        console.warn('Loader elements not found, skipping loader initialization');
-    }
+    } 
 }
 
 // Smooth scrolling for navigation links
