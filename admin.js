@@ -473,7 +473,7 @@ function updatePagination() {
     } catch (error) {
         console.error('Error loading analytics:', error.message);
     }
-}
+
 
 // Load admin users
 async function loadAdminUsers() {
