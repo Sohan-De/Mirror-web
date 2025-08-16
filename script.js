@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeFAQ();
     initializeHeroSection();
     initializeUserAuth();
+    initializePricingPlans();
 });
 
 // Initialize Hero Section
@@ -1824,4 +1825,212 @@ function initializeMetrics() {
             progress.style.animation = `metricProgress 2s ease-out forwards`;
         }, delay * 1000);
     });
+}
+
+// Initialize Pricing Plans
+async function initializePricingPlans() {
+    const container = document.getElementById('pricing-cards-container');
+    if (!container) return;
+
+    try {
+        // Check if Supabase is available
+        if (typeof isSupabaseReady === 'function' && !isSupabaseReady()) {
+            console.warn('Supabase not ready, showing fallback message');
+            showNoPlansMessage(container);
+            return;
+        }
+
+        // Fetch plans from Supabase
+        const { data: plans, error } = await supabase
+            .from('subscription_packages')
+            .select('*')
+            .order('price', { ascending: true });
+
+        if (error) {
+            console.error('Error fetching plans:', error);
+            showNoPlansMessage(container);
+            return;
+        }
+
+        if (!plans || plans.length === 0) {
+            showNoPlansMessage(container);
+            return;
+        }
+
+        // Render plans
+        renderPricingPlans(container, plans);
+
+    } catch (error) {
+        console.error('Error initializing pricing plans:', error);
+        showNoPlansMessage(container);
+    }
+}
+
+// Show no plans message
+function showNoPlansMessage(container) {
+    container.innerHTML = `
+        <div class="no-plans-message">
+            <h3>No Plans Available</h3>
+            <p>Currently, there are no subscription plans available. Please check back later or contact our support team for more information.</p>
+            <a href="#contact" class="cta-btn">Contact Support</a>
+        </div>
+    `;
+}
+
+// Render pricing plans
+function renderPricingPlans(container, plans) {
+    container.innerHTML = '';
+
+    plans.forEach((plan, index) => {
+        const planCard = createPlanCard(plan, index);
+        container.appendChild(planCard);
+    });
+}
+
+// Create individual plan card
+function createPlanCard(plan, index) {
+    const card = document.createElement('div');
+    card.className = `pricing-card ${plan.name?.toLowerCase() || 'plan'}`;
+    
+    // Add popular badge if it's the second plan (usually professional)
+    const popularBadge = index === 1 ? '<div class="popular-badge">Most Popular</div>' : '';
+    
+    // Parse features from plan description or use default
+    const features = plan.features ? JSON.parse(plan.features) : getDefaultFeatures(plan.name);
+    
+    card.innerHTML = `
+        ${popularBadge}
+        <div class="card-header">
+            <div class="plan-icon">${getPlanIcon(plan.name)}</div>
+            <h3 class="plan-name">${plan.name || 'Plan'}</h3>
+            <div class="plan-badge">${plan.duration || 'Custom'}</div>
+        </div>
+        <div class="plan-price">
+            <span class="currency">$</span>
+            <span class="amount">${plan.price || '0'}</span>
+            <span class="period">/${plan.billing_cycle || 'month'}</span>
+        </div>
+        <div class="plan-features">
+            ${features.map(feature => `
+                <div class="feature-item">
+                    <span class="feature-icon">✓</span>
+                    <span class="feature-text">${feature}</span>
+                </div>
+            `).join('')}
+        </div>
+        <button class="pricing-btn ${plan.name?.toLowerCase()}-btn" onclick="handlePlanAction('${plan.name}', ${plan.price})">
+            <span class="btn-text">${getPlanButtonText(plan.name)}</span>
+            <span class="btn-arrow">→</span>
+        </button>
+    `;
+
+    // Add entrance animation
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(30px)';
+    card.style.animation = `slideInUp 0.8s ease-out ${0.5 + (index * 0.2)}s forwards`;
+
+    return card;
+}
+
+// Get plan icon based on name
+function getPlanIcon(planName) {
+    const icons = {
+        'Free Trial': '🚀',
+        'Professional': '⭐',
+        'Enterprise': '🏢',
+        'Basic': '📱',
+        'Premium': '💎',
+        'Ultimate': '🚀'
+    };
+    return icons[planName] || '📋';
+}
+
+// Get default features based on plan name
+function getDefaultFeatures(planName) {
+    const defaultFeatures = {
+        'Free Trial': [
+            'Full feature access',
+            'HD quality mirroring',
+            'Basic recording',
+            'Email support'
+        ],
+        'Professional': [
+            'All trial features',
+            '4K recording',
+            'Live streaming',
+            'Priority support',
+            'Advanced settings',
+            'Lifetime updates'
+        ],
+        'Enterprise': [
+            'All professional features',
+            'Multi-device support',
+            'Team management',
+            'Custom integrations',
+            'Dedicated support',
+            'SLA guarantee'
+        ]
+    };
+    return defaultFeatures[planName] || ['Feature 1', 'Feature 2', 'Feature 3'];
+}
+
+// Get plan button text
+function getPlanButtonText(planName) {
+    const buttonTexts = {
+        'Free Trial': 'Start Free Trial',
+        'Professional': 'Get Professional',
+        'Enterprise': 'Contact Sales',
+        'Basic': 'Get Started',
+        'Premium': 'Get Premium',
+        'Ultimate': 'Get Ultimate'
+    };
+    return buttonTexts[planName] || 'Get Plan';
+}
+
+// Handle plan action
+function handlePlanAction(planName, price) {
+    if (planName === 'Free Trial') {
+        showDownloadModal();
+    } else if (planName === 'Enterprise') {
+        showContactModal();
+    } else {
+        showDownloadModal();
+    }
+}
+
+// Contact modal for plan actions
+function showContactModal() {
+    const contactModal = createModal('contact-modal', 'Contact Sales', `
+        <div class="contact-content">
+            <div class="contact-info">
+                <h3>Get in Touch</h3>
+                <p>Our sales team is here to help you with enterprise solutions and custom pricing.</p>
+                <div class="contact-methods">
+                    <div class="contact-method">
+                        <div class="contact-icon">📧</div>
+                        <div class="contact-details">
+                            <h4>Email Sales</h4>
+                            <p>sales@mirrorweb.com</p>
+                        </div>
+                    </div>
+                    <div class="contact-method">
+                        <div class="contact-icon">💬</div>
+                        <div class="contact-details">
+                            <h4>Live Chat</h4>
+                            <p>Available 24/7</p>
+                        </div>
+                    </div>
+                    <div class="contact-method">
+                        <div class="contact-icon">📞</div>
+                        <div class="contact-details">
+                            <h4>Phone Support</h4>
+                            <p>+1 (555) 123-4567</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `);
+    
+    document.body.appendChild(contactModal);
 }

@@ -2307,11 +2307,176 @@ body {
 
 .pricing-cards {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 2rem;
     margin-top: 4rem;
     width: 100%;
     max-width: 1200px;
+}
+
+.pricing-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    text-align: center;
+    grid-column: 1 / -1;
+}
+
+.pricing-loading .loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(0, 212, 255, 0.3);
+    border-top: 4px solid #00d4ff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+.pricing-loading p {
+    color: #b8c5d6;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.no-plans-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.no-plans-message h3 {
+    color: #00d4ff;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.no-plans-message p {
+    color: #b8c5d6;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.no-plans-message .cta-btn {
+    background: linear-gradient(45deg, #00d4ff, #00ff88);
+    color: #1a1a2e;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.no-plans-message .cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 212, 255, 0.4);
+}
+
+/* Contact Modal Styles */
+.contact-content {
+    color: white;
+}
+
+/* Responsive Pricing */
+@media (max-width: 768px) {
+    .pricing-cards {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .pricing-card {
+        min-height: auto;
+        padding: 1.2rem;
+    }
+    
+    .plan-icon {
+        font-size: 2rem;
+        margin-bottom: 0.6rem;
+    }
+    
+    .plan-name {
+        font-size: 1.3rem;
+        margin-bottom: 0.3rem;
+    }
+    
+    .amount {
+        font-size: 3rem;
+    }
+    
+    .contact-methods {
+        gap: 1rem;
+    }
+    
+    .contact-method {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.5rem;
+    }
+    
+    .contact-icon {
+        margin-bottom: 0.5rem;
+    }
+}
+
+.contact-info h3 {
+    color: #00d4ff;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.contact-info p {
+    color: #ccc;
+    text-align: center;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.contact-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.contact-method {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.contact-icon {
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 212, 255, 0.1);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.contact-details h4 {
+    color: #00d4ff;
+    margin-bottom: 0.3rem;
+    font-size: 1.1rem;
+}
+
+.contact-details p {
+    color: #ccc;
+    margin: 0;
+    font-size: 0.9rem;
 }
 
 .pricing-card {
@@ -2319,14 +2484,14 @@ body {
     backdrop-filter: blur(20px);
     border: 1px solid rgba(0, 212, 255, 0.1);
     border-radius: 25px;
-    padding: 2rem 2rem;
+    padding: 1.5rem 1.5rem;
     text-align: center;
     transition: all 0.4s ease;
     position: relative;
     overflow: visible;
     display: flex;
     flex-direction: column;
-    min-height: 500px;
+    min-height: 400px;
 }
 
 .pricing-card::before {
@@ -2380,21 +2545,21 @@ body {
 .card-header {
     position: relative;
     z-index: 2;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .plan-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
+    font-size: 2.5rem;
+    margin-bottom: 0.8rem;
     filter: drop-shadow(0 0 15px rgba(0, 212, 255, 0.5));
     animation: float 3s ease-in-out infinite;
 }
 
 .plan-name {
-    font-size: 1.8rem;
+    font-size: 1.3rem;
     font-weight: 700;
     color: white;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.3rem;
     text-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
 }
 
@@ -2413,7 +2578,7 @@ body {
 .plan-price {
     position: relative;
     z-index: 2;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .currency {
@@ -2424,7 +2589,7 @@ body {
 }
 
 .amount {
-    font-size: 4rem;
+    font-size: 3.5rem;
     font-weight: 800;
     color: white;
     text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
@@ -2439,16 +2604,16 @@ body {
 .plan-features {
     position: relative;
     z-index: 2;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     flex: 1;
-    min-height: 120px;
+    min-height: 100px;
 }
 
 .feature-item {
     display: flex;
     align-items: center;
     gap: 0.8rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.8rem;
     text-align: left;
 }
 
@@ -4060,6 +4225,32 @@ body {
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+@keyframes slideInUpScale {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes slideInUpBounce {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.9);
+    }
+    70% {
+        opacity: 1;
+        transform: translateY(-5px) scale(1.05);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }
 
@@ -7002,6 +7193,8 @@ body {
     flex-direction: column;
     gap: 0.75rem;
     margin-top: 0.25rem;
+    opacity: 0;
+    animation: slideInUpBounce 1s ease-out 1.3s forwards;
 }
 
 .hero-buttons-row {
@@ -7035,6 +7228,27 @@ body {
     box-sizing: border-box;
     text-transform: uppercase;
     letter-spacing: 1px;
+    opacity: 0;
+    animation: slideInUpScale 0.8s ease-out forwards;
+    position: relative;
+}
+
+.hero-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 8px;
+    background: linear-gradient(45deg, rgba(0, 212, 255, 0.1), rgba(0, 255, 136, 0.1));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.hero-btn:hover::after {
+    opacity: 1;
 }
 
 .hero-btn.primary {
@@ -7042,12 +7256,14 @@ body {
     color: #1a1a2e;
     border: none;
     box-shadow: 0 8px 25px rgba(0, 212, 255, 0.4);
+    animation-delay: 1.3s;
 }
 
 .hero-btn.primary:hover {
-    transform: translateY(-3px);
+    transform: translateY(-3px) scale(1.02);
     box-shadow: 0 12px 35px rgba(0, 212, 255, 0.6);
     background: linear-gradient(45deg, #00ff88, #00d4ff);
+    filter: brightness(1.1);
 }
 
 .hero-btn.secondary {
@@ -7087,6 +7303,7 @@ body {
     border-radius: 8px;
     backdrop-filter: blur(10px);
     position: relative;
+    animation-delay: 1.4s;
 }
 
 .hero-btn.outline::before {
@@ -7107,8 +7324,9 @@ body {
 }
 
 .hero-btn.outline:hover {
-    transform: translateY(-3px);
+    transform: translateY(-3px) scale(1.02);
     box-shadow: 0 12px 35px rgba(0, 212, 255, 0.6);
+    filter: brightness(1.1);
 }
 
 .hero-btn.outline:hover::before {
@@ -7117,11 +7335,54 @@ body {
 
 .btn-icon {
     font-size: 1.2rem;
+    transition: all 0.3s ease;
+    display: inline-block;
+    animation: iconEntrance 0.6s ease-out forwards;
+    animation-delay: 1.5s;
+    opacity: 0;
+    transform: rotate(-10deg) scale(0.8);
+}
+
+@keyframes iconEntrance {
+    from {
+        opacity: 0;
+        transform: rotate(-10deg) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: rotate(0deg) scale(1);
+    }
+}
+
+.hero-btn:hover .btn-icon {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.6));
 }
 
 .btn-text {
     font-weight: 700;
     letter-spacing: 1px;
+    transition: all 0.3s ease;
+    position: relative;
+    animation: textEntrance 0.6s ease-out forwards;
+    animation-delay: 1.6s;
+    opacity: 0;
+    transform: translateX(-10px);
+}
+
+@keyframes textEntrance {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.hero-btn:hover .btn-text {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
 .hero-image {
