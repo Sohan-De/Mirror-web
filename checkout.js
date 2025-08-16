@@ -25,23 +25,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Get package from URL parameters and show package details
     await loadPackageFromURL();
     
-    // Debug: Log the current package details
-    console.log('Package loaded, checking price:', currentPackage?.price);
-    console.log('Package type:', currentPackage?.name);
-    
-    // Initialize Stripe only for paid plans
-    if (currentPackage && currentPackage.price > 0) {
-        console.log('Paid plan detected, initializing Stripe for $' + currentPackage.price);
-        initializeStripe();
-    } else if (currentPackage && currentPackage.price === 0) {
-        console.log('Free plan detected, skipping Stripe initialization');
-        showFreePlanCheckout();
-    } else {
-        console.error('No package loaded or invalid package data');
-        showError('Failed to load package details. Please try again.');
-        return;
-    }
-    
+    // Initialize Stripe directly (no auth required)
+    initializeStripe();
     setupFormValidation();
     setupPaymentMethodToggle();
     setupCryptoPayments();
@@ -121,8 +106,6 @@ async function loadPackageFromURL() {
         
         currentPackage = packageData;
         console.log('Loaded package:', currentPackage);
-        console.log('Package price set to:', currentPackage.price);
-        console.log('Package name set to:', currentPackage.name);
         
         // Update the UI with package details
         updatePackageDisplay();
@@ -248,17 +231,11 @@ function initializeStripe() {
             throw new Error('Stripe library not loaded');
         }
         
-        // Double-check if this is a free plan (safety check)
+        // Check if this is a free plan
         if (currentPackage && currentPackage.price === 0) {
-            console.log('Free plan detected in initializeStripe, skipping Stripe initialization');
+            console.log('Free plan detected, skipping Stripe initialization');
             showFreePlanCheckout();
             return;
-        }
-        
-        // Additional safety check for amount
-        if (!currentPackage || currentPackage.price <= 0) {
-            console.error('Invalid package or price for Stripe initialization:', currentPackage);
-            throw new Error('Invalid package configuration for payment');
         }
         
         // Create card element with proper styling for paid plans
