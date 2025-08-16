@@ -95,7 +95,7 @@ async function loadPackageFromURL() {
             console.log('Package not found in mock data, using default Pro plan');
         }
         
-        // Special handling for Pro plan to ensure correct price
+        // Special handling for Pro plan to ensure correct pricehj
         if (packageId.toLowerCase() === 'pro') {
             packageData = mockPackages['pro'];
             console.log('Pro plan detected, ensuring correct price:', packageData.price);

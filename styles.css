@@ -2379,6 +2379,24 @@ body {
     box-shadow: 0 8px 25px rgba(0, 212, 255, 0.4);
 }
 
+.no-plans-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.no-plans-actions .cta-btn.secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: #00d4ff;
+    border: 1px solid rgba(0, 212, 255, 0.3);
+}
+
+.no-plans-actions .cta-btn.secondary:hover {
+    background: rgba(0, 212, 255, 0.1);
+    border-color: rgba(0, 212, 255, 0.5);
+}
+
 /* Contact Modal Styles */
 .contact-content {
     color: white;

@@ -12,7 +12,9 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeFAQ();
     initializeHeroSection();
     initializeUserAuth();
-    initializePricingPlans();
+    
+    // Initialize pricing plans with retry mechanism
+    initializePricingPlansWithRetry();
 });
 
 // Initialize Hero Section
@@ -1518,6 +1520,20 @@ function showContactModal() {
     document.body.appendChild(contactModal);
 }
 
+// Retry loading pricing plans
+function retryPricingPlans() {
+    console.log('Manual retry of pricing plans requested');
+    const container = document.getElementById('pricing-cards-container');
+    if (container) {
+        // Remove any existing content
+        container.innerHTML = '';
+        // Remove any loaded markers
+        container.classList.remove('fallback-plans-loaded');
+        // Reinitialize
+        initializePricingPlans();
+    }
+}
+
 // Modern Footer Functionality
 function initializeModernFooter() {
     // Newsletter subscription
@@ -1827,19 +1843,59 @@ function initializeMetrics() {
     });
 }
 
+// Initialize Pricing Plans with retry mechanism
+async function initializePricingPlansWithRetry() {
+    console.log('Starting pricing plans initialization with retry...');
+    
+    // Try to initialize immediately
+    await initializePricingPlans();
+    
+    // If Supabase wasn't ready, retry after a delay
+    setTimeout(async () => {
+        console.log('Retrying pricing plans initialization...');
+        await initializePricingPlans();
+    }, 2000);
+    
+    // Final retry after 5 seconds
+    setTimeout(async () => {
+        console.log('Final retry for pricing plans initialization...');
+        await initializePricingPlans();
+    }, 5000);
+}
+
 // Initialize Pricing Plans
 async function initializePricingPlans() {
     const container = document.getElementById('pricing-cards-container');
     if (!container) return;
 
+    // Check if plans are already loaded
+    if (container.querySelector('.pricing-card') || container.querySelector('.fallback-plans-loaded')) {
+        console.log('Plans already loaded, skipping initialization');
+        return;
+    }
+
     try {
-        // Check if Supabase is available
+        console.log('Initializing pricing plans...');
+        
+        // Show loading state
+        showPricingLoading(container);
+        
+        // Check if Supabase is available and ready
         if (typeof isSupabaseReady === 'function' && !isSupabaseReady()) {
-            console.warn('Supabase not ready, showing fallback message');
-            showNoPlansMessage(container);
+            console.warn('Supabase not ready, showing fallback plans');
+            showFallbackPlans(container);
             return;
         }
 
+        // Check if supabase object exists
+        if (typeof supabase === 'undefined' || !supabase) {
+            console.warn('Supabase object not available, showing fallback plans');
+            showFallbackPlans(container);
+            return;
+        }
+
+        console.log('Attempting to fetch plans from Supabase...');
+        
         // Fetch plans from Supabase
         const { data: plans, error } = await supabase
             .from('subscription_packages')
@@ -1847,23 +1903,74 @@ async function initializePricingPlans() {
             .order('price', { ascending: true });
 
         if (error) {
-            console.error('Error fetching plans:', error);
-            showNoPlansMessage(container);
+            console.error('Error fetching plans from Supabase:', error);
+            console.log('Showing fallback plans due to Supabase error');
+            showFallbackPlans(container);
             return;
         }
 
         if (!plans || plans.length === 0) {
-            showNoPlansMessage(container);
+            console.log('No plans found in Supabase, showing fallback plans');
+            showFallbackPlans(container);
             return;
         }
 
+        console.log('Successfully fetched plans from Supabase:', plans);
         // Render plans
         renderPricingPlans(container, plans);
 
     } catch (error) {
         console.error('Error initializing pricing plans:', error);
-        showNoPlansMessage(container);
+        console.log('Showing fallback plans due to error');
+        showFallbackPlans(container);
     }
+}
+
+// Show loading state for pricing plans
+function showPricingLoading(container) {
+    container.innerHTML = `
+        <div class="pricing-loading">
+            <div class="loading-spinner"></div>
+            <p>Loading pricing plans...</p>
+        </div>
+    `;
+}
+
+// Show fallback plans (when Supabase is not available)
+function showFallbackPlans(container) {
+    console.log('Showing fallback plans');
+    
+    const fallbackPlans = [
+        {
+            id: 'free-trial',
+            name: 'Free Trial',
+            price: 0,
+            duration: '7 Days',
+            billing_cycle: 'trial',
+            features: ['Full feature access', 'HD quality mirroring', 'Basic recording', 'Email support']
+        },
+        {
+            id: 'professional',
+            name: 'Professional',
+            price: 29.99,
+            duration: 'Lifetime',
+            billing_cycle: 'one-time',
+            features: ['All trial features', '4K recording', 'Live streaming', 'Priority support', 'Advanced settings', 'Lifetime updates']
+        },
+        {
+            id: 'enterprise',
+            name: 'Enterprise',
+            price: 199,
+            duration: 'Custom',
+            billing_cycle: 'year',
+            features: ['All professional features', 'Multi-device support', 'Team management', 'Custom integrations', 'Dedicated support', 'SLA guarantee']
+        }
+    ];
+    
+    renderPricingPlans(container, fallbackPlans);
+    
+    // Mark as fallback plans loaded
+    container.classList.add('fallback-plans-loaded');
 }
 
 // Show no plans message
@@ -1872,7 +1979,10 @@ function showNoPlansMessage(container) {
         <div class="no-plans-message">
             <h3>No Plans Available</h3>
             <p>Currently, there are no subscription plans available. Please check back later or contact our support team for more information.</p>
-            <a href="#contact" class="cta-btn">Contact Support</a>
+            <div class="no-plans-actions">
+                <button class="cta-btn" onclick="retryPricingPlans()">Retry Loading Plans</button>
+                <a href="#contact" class="cta-btn secondary">Contact Support</a>
+            </div>
         </div>
     `;
 }
