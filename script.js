@@ -514,36 +514,110 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Loader functionality
 function initializeLoader() {
+    console.log('Initializing loader...');
     const loaderOverlay = document.getElementById('loader-overlay');
     const mainContent = document.getElementById('main-content');
     const lottieContainer = document.getElementById('lottie-container');
     
+    console.log('Loader elements found:', {
+        loaderOverlay: !!loaderOverlay,
+        mainContent: !!mainContent,
+        lottieContainer: !!lottieContainer
+    });
+    
     if (loaderOverlay && mainContent && lottieContainer) {
-        // Load and play Lottie animation (only for loader)
-        const animation = lottie.loadAnimation({
-            container: lottieContainer,
-            renderer: 'svg',
-            loop: true,
-            autoplay: true,
-            path: 'icon.json' // Path to your Lottie JSON file
-        });
+        let animation = null;
+        let animationLoaded = false;
         
-        // Handle animation load
-        animation.addEventListener('DOMLoaded', function() {
-            console.log('Lottie animation loaded successfully');
-        });
+        // Try to load the Lottie animation with multiple fallback methods
+        try {
+            console.log('Attempting to load Lottie animation from ./icon.json');
+            // Method 1: Try relative path first
+            animation = lottie.loadAnimation({
+                container: lottieContainer,
+                renderer: 'svg',
+                loop: true,
+                autoplay: true,
+                path: './icon.json'
+            });
+            
+            // Handle animation load
+            animation.addEventListener('DOMLoaded', function() {
+                console.log('Lottie animation loaded successfully from relative path');
+                animationLoaded = true;
+            });
+            
+            // Handle animation errors
+            animation.addEventListener('error', function(error) {
+                console.error('Lottie animation error from relative path:', error);
+                tryAlternativePath();
+            });
+            
+        } catch (error) {
+            console.error('Failed to initialize Lottie animation with relative path:', error);
+            tryAlternativePath();
+        }
         
-        // Handle animation errors
-        animation.addEventListener('error', function(error) {
-            console.error('Lottie animation error:', error);
-            // Fallback to simple spinner if Lottie fails
-            lottieContainer.innerHTML = '<div class="loading-spinner">🔄</div>';
-        });
+        // Method 2: Try alternative path if first method fails
+        function tryAlternativePath() {
+            try {
+                console.log('Attempting to load Lottie animation from icon.json (without ./)');
+                if (animation) {
+                    animation.destroy();
+                }
+                
+                animation = lottie.loadAnimation({
+                    container: lottieContainer,
+                    renderer: 'svg',
+                    loop: true,
+                    autoplay: true,
+                    path: 'icon.json' // Try without ./ prefix
+                });
+                
+                animation.addEventListener('DOMLoaded', function() {
+                    console.log('Lottie animation loaded successfully from alternative path');
+                    animationLoaded = true;
+                });
+                
+                animation.addEventListener('error', function(error) {
+                    console.error('Lottie animation error from alternative path:', error);
+                    fallbackToCSSAnimation();
+                });
+                
+            } catch (error) {
+                console.error('Failed to initialize Lottie animation with alternative path:', error);
+                fallbackToCSSAnimation();
+            }
+        }
+        
+        // Set a timeout to fallback if animation doesn't load
+        setTimeout(() => {
+            if (!animationLoaded) {
+                console.warn('Lottie animation failed to load within 3 seconds, using fallback');
+                fallbackToCSSAnimation();
+            }
+        }, 3000);
+        
+        // Fallback to CSS animation if Lottie fails
+        function fallbackToCSSAnimation() {
+            console.log('Using CSS fallback animation');
+            if (lottieContainer) {
+                lottieContainer.innerHTML = `
+                    <div class="fallback-loader">
+                        <div class="spinner-ring"></div>
+                        <div class="loading-text">Loading...</div>
+                    </div>
+                `;
+            }
+        }
         
         // Simulate loading time
         setTimeout(() => {
-            // Stop the animation
-            animation.stop();
+            console.log('Loader timeout reached, transitioning to main content');
+            // Stop the animation if it exists
+            if (animation && animationLoaded) {
+                animation.stop();
+            }
             
             // Fade out loader
             loaderOverlay.style.opacity = '0';
@@ -561,6 +635,8 @@ function initializeLoader() {
                 // while the loader background is hidden
             }, 500);
         }, 4193);
+    } else {
+        console.error('Required loader elements not found');
     } 
 }
 

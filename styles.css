@@ -61,15 +61,37 @@ body {
     z-index: 2;
 }
 
-.loading-spinner {
-    font-size: 3rem;
-    color: #00d4ff;
-    animation: spin 2s linear infinite;
+/* Fallback loader styles for when Lottie fails */
+.fallback-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
 }
 
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+.spinner-ring {
+    width: 80px;
+    height: 80px;
+    border: 4px solid rgba(0, 212, 255, 0.2);
+    border-top: 4px solid #00d4ff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+}
+
+.loading-text {
+    color: #00d4ff;
+    font-size: 1.2rem;
+    font-weight: 500;
+    text-align: center;
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
 }
 
 .loading-spinner {
