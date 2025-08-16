@@ -2484,14 +2484,14 @@ body {
     backdrop-filter: blur(20px);
     border: 1px solid rgba(0, 212, 255, 0.1);
     border-radius: 25px;
-    padding: 1.5rem 1.5rem;
+    padding: 1.2rem 1.2rem;
     text-align: center;
     transition: all 0.4s ease;
     position: relative;
     overflow: visible;
     display: flex;
     flex-direction: column;
-    min-height: 400px;
+    min-height: 350px;
 }
 
 .pricing-card::before {
@@ -2545,7 +2545,7 @@ body {
 .card-header {
     position: relative;
     z-index: 2;
-    margin-bottom: 1rem;
+    margin-bottom: 0.8rem;
 }
 
 .plan-icon {
@@ -2578,7 +2578,7 @@ body {
 .plan-price {
     position: relative;
     z-index: 2;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.2rem;
 }
 
 .currency {
@@ -2589,7 +2589,7 @@ body {
 }
 
 .amount {
-    font-size: 3.5rem;
+    font-size: 3rem;
     font-weight: 800;
     color: white;
     text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
@@ -2604,9 +2604,9 @@ body {
 .plan-features {
     position: relative;
     z-index: 2;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.2rem;
     flex: 1;
-    min-height: 100px;
+    min-height: 80px;
 }
 
 .feature-item {
