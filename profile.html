@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Mirror Web</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
+    <script src="profile.js"></script>
+    <style>
+        /* Additional styles specific to profile page */
+        .profile-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            position: relative;
+            overflow: hidden;
+            padding-top: 80px; /* Space for fixed navbar */
+        }
+
+        .profile-header {
+            padding: 3rem 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .profile-title {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #00d4ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .profile-subtitle {
+            color: #ccc;
+            font-size: 1rem;
+            font-weight: 400;
+            margin-bottom: 2rem;
+        }
+
+        .profile-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 2rem 3rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .profile-sidebar {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .profile-main {
+            flex: 2;
+            min-width: 500px;
+        }
+
+        .profile-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .profile-card-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #00d4ff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .profile-avatar-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid rgba(0, 212, 255, 0.5);
+        }
+
+        .avatar-text {
+            font-size: 3rem;
+            color: #00d4ff;
+            font-weight: 600;
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-upload-btn {
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid rgba(0, 212, 255, 0.5);
+            border-radius: 50px;
+            padding: 0.5rem 1.5rem;
+            color: #00d4ff;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .avatar-upload-btn:hover {
+            background: rgba(0, 212, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .avatar-input {
+            display: none;
+        }
+
+        .profile-info {
+            color: white;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .profile-email {
+            color: #ccc;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .subscription-info {
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .subscription-label {
+            color: #ccc;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subscription-value {
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .subscription-tier {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tier-badge {
+            background: linear-gradient(45deg, #00d4ff, #00ff88);
+            color: #1a1a2e;
+            padding: 0.3rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            background: #00ff88;
+            color: #1a1a2e;
+            padding: 0.3rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status-badge.inactive {
+            background: #ff4757;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            position: absolute;
+            top: -10px;
+            left: 15px;
+            background: linear-gradient(45deg, #00d4ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0 5px;
+        }
+
+        .form-label::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #1a1a2e;
+            z-index: -1;
+            transform: translateY(-50%);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: rgba(0, 212, 255, 0.5);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .profile-btn {
+            padding: 1rem 2rem;
+            background: linear-gradient(45deg, #00d4ff, #00ff88);
+            border: none;
+            border-radius: 8px;
+            color: #1a1a2e;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 1rem;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .profile-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.4);
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+        }
+
+        .profile-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .profile-btn:hover::after {
+            transform: translateX(100%);
+        }
+
+        .nav-tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-tab {
+            padding: 1rem 1.5rem;
+            color: #ccc;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-tab.active {
+            color: #00d4ff;
+        }
+
+        .nav-tab::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(45deg, #00d4ff, #00ff88);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-tab.active::after {
+            transform: scaleX(1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .back-to-home {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .back-to-home:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(-5px);
+        }
+
+        @media (max-width: 768px) {
+            .profile-content {
+                flex-direction: column;
+            }
+
+            .profile-main, .profile-sidebar {
+                min-width: 100%;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .back-to-home {
+                top: 1rem;
+                left: 1rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="background-dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>
+    <div class="background-stars">
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="nav-logo">
+                <h2 class="logo-text">Mirror Web</h2>
+            </div>
+            <div class="nav-links" style="margin: 0 auto;">
+                <a href="index.html#features" class="nav-link">Features</a>
+                <a href="index.html#download" class="nav-link">Download</a>
+                <a href="index.html#guide" class="nav-link">Guide</a>
+                <a href="index.html#contact" class="nav-link">Contact</a>
+            </div>
+            <button class="download-btn-main android" id="logout-btn" style="margin-right: 0;">
+                <span class="play-icon">🚪</span>
+                LOGOUT
+            </button>
+        </div>
+    </nav>
+
+    <a href="index.html" class="back-to-home">
+        <span>←</span>
+        <span>Back to Home</span>
+    </a>
+
+    <div class="profile-container">
+        <div class="profile-header">
+            <h1 class="profile-title">My Profile</h1>
+            <p class="profile-subtitle">Manage your personal information and subscription</p>
+        </div>
+
+        <div class="profile-content">
+            <div class="profile-sidebar">
+                <div class="profile-card">
+                    <div class="profile-avatar-container">
+                        <div class="profile-avatar" id="profile-avatar">
+                            <div class="avatar-text">JD</div>
+                        </div>
+                        <label for="avatar-upload" class="avatar-upload-btn">
+                            <span>Change Avatar</span>
+                        </label>
+                        <input type="file" id="avatar-upload" class="avatar-input" accept="image/*">
+                    </div>
+                    <div class="profile-info">
+                        <h3 class="profile-name" id="profile-name">John Doe</h3>
+                        <p class="profile-email" id="profile-email">john.doe@example.com</p>
+                    </div>
+                    <div class="subscription-info">
+                        <div class="subscription-tier">
+                            <div class="subscription-label">Subscription:</div>
+                            <div class="tier-badge" id="subscription-tier">Professional</div>
+                        </div>
+                        <div class="subscription-tier">
+                            <div class="subscription-label">Status:</div>
+                            <div class="status-badge" id="subscription-status">Active</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-main">
+                <div class="profile-card">
+                    <div class="nav-tabs">
+                        <div class="nav-tab active" data-tab="personal">Personal Information</div>
+                        <div class="nav-tab" data-tab="account">Account Settings</div>
+                    </div>
+
+                    <div class="tab-content active" id="personal-tab">
+                        <form id="profile-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="profile-first-name" class="form-label">First Name</label>
+                                    <input type="text" id="profile-first-name" class="form-input" placeholder="First name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="profile-last-name" class="form-label">Last Name</label>
+                                    <input type="text" id="profile-last-name" class="form-input" placeholder="Last name">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="profile-bio" class="form-label">Bio</label>
+                                <textarea id="profile-bio" class="form-input form-textarea" placeholder="Tell us about yourself"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="profile-website" class="form-label">Website</label>
+                                <input type="url" id="profile-website" class="form-input" placeholder="https://yourwebsite.com">
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="profile-company" class="form-label">Company</label>
+                                    <input type="text" id="profile-company" class="form-input" placeholder="Your company">
+                                </div>
+                                <div class="form-group">
+                                    <label for="profile-job-title" class="form-label">Job Title</label>
+                                    <input type="text" id="profile-job-title" class="form-input" placeholder="Your job title">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="profile-btn" style="width: auto; padding: 0.8rem 2rem; font-size: 0.9rem; margin: 1rem auto; display: block;">Save Changes</button>
+                        </form>
+                    </div>
+
+                    <div class="tab-content" id="account-tab">
+                        <div class="form-group">
+                            <label for="profile-email-settings" class="form-label">Email</label>
+                            <input type="email" id="profile-email-settings" class="form-input" disabled>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="profile-password" class="form-label">New Password</label>
+                            <input type="password" id="profile-password" class="form-input" placeholder="Enter new password">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="profile-confirm-password" class="form-label">Confirm New Password</label>
+                            <input type="password" id="profile-confirm-password" class="form-input" placeholder="Confirm new password">
+                        </div>
+
+                        <button type="button" class="profile-btn" id="change-password-btn" style="width: auto; padding: 0.8rem 2rem; font-size: 0.9rem; margin: 1rem auto; display: block;">Change Password</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab functionality
+            const tabs = document.querySelectorAll('.nav-tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            // Check for hash in URL to activate specific tab
+            const hash = window.location.hash;
+            if (hash && hash === '#account-tab') {
+                document.querySelector('.nav-tab[data-tab="account"]').click();
+            }
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Remove active class from all tabs and contents
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to selected tab and content
+                    this.classList.add('active');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+            
+            // Password change functionality
+            const changePasswordBtn = document.getElementById('change-password-btn');
+            if (changePasswordBtn) {
+                changePasswordBtn.addEventListener('click', async function() {
+                    const password = document.getElementById('profile-password').value;
+                    const confirmPassword = document.getElementById('profile-confirm-password').value;
+                    
+                    if (!password) {
+                        alert('Please enter a new password.');
+                        return;
+                    }
+                    
+                    if (password !== confirmPassword) {
+                        alert('Passwords do not match.');
+                        return;
+                    }
+                    
+                    // Show loading state
+                    const originalText = this.textContent;
+                    this.textContent = 'Changing Password...';
+                    this.disabled = true;
+                    
+                    try {
+                        const { error } = await supabase.auth.updateUser({
+                            password: password
+                        });
+                        
+                        if (error) throw error;
+                        
+                        // Clear password fields
+                        document.getElementById('profile-password').value = '';
+                        document.getElementById('profile-confirm-password').value = '';
+                        
+                        // Show success message
+                        alert('Password changed successfully!');
+                        
+                    } catch (error) {
+                        console.error('Error changing password:', error.message);
+                        alert('Error changing password: ' + error.message);
+                    } finally {
+                        // Reset button
+                        this.textContent = originalText;
+                        this.disabled = false;
+                    }
+                });
+            }
+            
+            // Check auth status and redirect if not logged in
+            async function checkAuth() {
+                const { user, error } = await getCurrentUser();
+                
+                if (error || !user) {
+                    window.location.href = 'sign-in.html';
+                } else {
+                    // Set email in account settings
+                    const emailInput = document.getElementById('profile-email-settings');
+                    if (emailInput) {
+                        emailInput.value = user.email;
+                    }
+                }
+            }
+            
+            // Handle logout button
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    
+                    try {
+                        // Sign out from Supabase
+                        const { error } = await signOut();
+                        
+                        if (error) {
+                            throw error;
+                        }
+                        
+                        // Redirect to home page
+                        window.location.href = 'index.html';
+                        
+                    } catch (error) {
+                        console.error('Error signing out:', error.message);
+                        alert('Error signing out: ' + error.message);
+                    }
+                });
+            }
+            
+            checkAuth();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mirror Web - Professional Screen Projection Software</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
+</head>
+<body>
+    <!-- Global Background Animation -->
+    <div class="global-background">
+        <div class="background-dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+        <div class="background-stars">
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+        </div>
+    </div>
+
+    <!-- Loader Overlay -->
+    <div id="loader-overlay" class="loader-overlay">
+        <!-- Loader Background Elements -->
+        <div class="loader-background">
+            <div class="background-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+            <div class="background-stars">
+                <div class="star-bg">★</div>
+                <div class="star-bg">★</div>
+                <div class="star-bg">★</div>
+                <div class="star-bg">★</div>
+                <div class="star-bg">★</div>
+                <div class="star-bg">★</div>
+                <div class="star-bg">★</div>
+                <div class="star-bg">★</div>
+                <div class="star-bg">★</div>
+                <div class="star-bg">★</div>
+                <div class="star-bg">★</div>
+                <div class="star-bg">★</div>
+                <div class="star-bg">★</div>
+                <div class="star-bg">★</div>
+                <div class="star-bg">★</div>
+                <div class="star-bg">★</div>
+            </div>
+        </div>
+        <div class="loader-container">
+            <div id="lottie-container" class="lottie-container"></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="main-content hidden">
+        <!-- Background Elements -->
+        <div class="background-dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+        <div class="background-stars">
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+            <div class="star-bg">★</div>
+        </div>
+        
+        <!-- Navigation Bar -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <h2 class="logo-text">Mirror Web</h2>
+                </div>
+                <div class="nav-links">
+                    <a href="#features" class="nav-link">Features</a>
+                    <a href="#download" class="nav-link">Download</a>
+                    <a href="#guide" class="nav-link">Guide</a>
+                    <a href="#contact" class="nav-link">Contact</a>
+                </div>
+                <div class="nav-auth" id="nav-auth-buttons">
+                    <a href="sign-in.html" class="nav-btn signin-btn">
+                        <span class="btn-icon">📖</span>
+                        <span class="btn-text">SIGN IN</span>
+                    </a>
+                    <a href="sign-up.html" class="nav-btn signup-btn">
+                        <span class="btn-icon">🚀</span>
+                        <span class="btn-text">SIGN UP</span>
+                    </a>
+                </div>
+                <div class="nav-profile" id="nav-profile" style="display: none;">
+                    <div class="profile-dropdown">
+                        <div class="profile-btn">
+                            <div class="profile-avatar">
+                                <span class="avatar-text">JD</span>
+                            </div>
+                            <span class="profile-name">John Doe</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </div>
+                        <div class="dropdown-menu">
+                            <a href="profile.html" class="dropdown-item">
+                                <span class="item-icon">👤</span>
+                                <span>My Profile</span>
+                            </a>
+                            <a href="profile.html#account-tab" class="dropdown-item">
+                                <span class="item-icon">⚙️</span>
+                                <span>Settings</span>
+                            </a>
+                            <a href="admin-dashboard.html" class="dropdown-item admin-link" style="display:none;">
+                                <span class="item-icon">🔐</span>
+                                <span>Admin</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item" id="logout-btn">
+                                <span class="item-icon">🚪</span>
+                                <span>Logout</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-container">
+                <!-- Left Content -->
+                <div class="hero-content">
+                    <h1 class="hero-title">
+                        <span class="title-normal">Professional</span>
+                        <span class="title-highlight">Screen Projection</span>
+                        <span class="title-normal">Software</span>
+                    </h1>
+                    
+                    <p class="hero-description">
+                        Mirror your Android screen to PC with ultra-low latency, high quality, and seamless connectivity. Perfect for presentations, gaming, and content creation.
+                    </p>
+                    
+                    <div class="hero-buttons">
+                        <div class="hero-buttons-row">
+                            <button class="hero-btn primary">
+                                <span class="btn-icon">📱</span>
+                                <span class="btn-text">DOWNLOAD MIRROR WEB</span>
+                            </button>
+                            <button class="hero-btn outline">
+                                <span class="btn-icon">📖</span>
+                                <span class="btn-text">SETUP GUIDE</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Video Placeholder -->
+                <div class="hero-image">
+                    <div class="video-placeholder">
+                        <div class="video-wrapper">
+                            <div class="video-overlay" id="video-overlay">
+                                <button class="play-button" id="play-button">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64">
+                                        <circle cx="12" cy="12" r="11" fill="#00d4ff" fill-opacity="0.2"/>
+                                        <circle cx="12" cy="12" r="8" fill="#00d4ff" fill-opacity="0.4"/>
+                                        <path d="M16 12l-6 4V8z" fill="#ffffff"/>
+                                    </svg>
+                                </button>
+                                <div class="video-info">
+                                    <span class="video-title">Watch Demo</span>
+                                    <span class="video-duration">1:45</span>
+                                </div>
+                            </div>
+                            <div class="video-thumbnail" id="video-thumbnail">
+                                <div class="video-device-frame">
+                                    <div class="device-screen"></div>
+                                    <div class="device-reflection"></div>
+                                </div>
+                            </div>
+                            <div class="youtube-embed" id="youtube-embed" style="display: none;">
+                                <iframe 
+                                    id="youtube-player"
+                                    width="100%" 
+                                    height="100%" 
+                                    src="https://www.youtube.com/embed/uHxZMmvQXHQ?enablejsapi=1&rel=0&modestbranding=1&autoplay=0" 
+                                    title="Demo Video"
+                                    frameborder="0" 
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                    allowfullscreen>
+                                </iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="features-section">
+            <div class="features-container">
+                    <div class="features-header">
+                        <h2 class="features-title">Why Choose <span class="highlight-text">Mirror Web</span>?</h2>
+                        <p class="features-subtitle">Professional-grade screen projection with enterprise-level features</p>
+                </div>
+                
+                    <div class="features-showcase">
+                    <!-- Feature 1: Ultra-Low Latency -->
+                    <div class="feature-showcase-item" data-feature="latency">
+                        <div class="feature-visual">
+                            <div class="feature-circle">
+                                <div class="feature-icon-wrapper">
+                                    <span class="feature-icon">⚡</span>
+                                    <div class="icon-glow"></div>
+                                </div>
+                                <div class="feature-pulse-ring"></div>
+                                <div class="feature-pulse-ring"></div>
+                                <div class="feature-pulse-ring"></div>
+                            </div>
+                        </div>
+                        <div class="feature-content">
+                            <div class="feature-header">
+                                <h3 class="feature-title">Ultra-Low Latency</h3>
+                            </div>
+                            <p class="feature-description">Real-time screen mirroring with ultra-low latency for smooth performance.</p>
+                            <div class="feature-stats">
+                                <div class="stat-item">
+                                    <span class="stat-value">&lt;10ms</span>
+                                    <span class="stat-label">Latency</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">60fps</span>
+                                    <span class="stat-label">Frame Rate</span>
+                                </div>
+                            </div>
+                            <div class="feature-action">
+                                <button class="feature-btn" onclick="showFeatureDemo('latency')">
+                                    <span class="btn-text">See in Action</span>
+                                    <span class="btn-arrow">→</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 2: HD Quality -->
+                    <div class="feature-showcase-item" data-feature="quality">
+                        <div class="feature-visual">
+                            <div class="feature-circle">
+                                <div class="feature-icon-wrapper">
+                                    <span class="feature-icon">🎯</span>
+                                    <div class="icon-glow"></div>
+                                </div>
+                                <div class="quality-indicator">
+                                    <div class="quality-bar"></div>
+                                    <div class="quality-bar"></div>
+                                    <div class="quality-bar"></div>
+                                    <div class="quality-bar"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feature-content">
+                            <div class="feature-header">
+                                <h3 class="feature-title">HD Quality</h3>
+                            </div>
+                            <p class="feature-description">Crystal clear 1080p resolution with HDR support and customization.</p>
+                            <div class="feature-stats">
+                                <div class="stat-item">
+                                    <span class="stat-value">1080p</span>
+                                    <span class="stat-label">Resolution</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">HDR</span>
+                                    <span class="stat-label">Support</span>
+                                </div>
+                            </div>
+                            <div class="feature-action">
+                                <button class="feature-btn" onclick="showFeatureDemo('quality')">
+                                    <span class="btn-text">See in Action</span>
+                                    <span class="btn-arrow">→</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 3: Easy Connection -->
+                    <div class="feature-showcase-item" data-feature="connection">
+                        <div class="feature-visual">
+                            <div class="feature-circle">
+                                <div class="feature-icon-wrapper">
+                                    <span class="feature-icon">🔗</span>
+                                    <div class="icon-glow"></div>
+                                </div>
+                                <div class="connection-animation">
+                                    <div class="device-phone">📱</div>
+                                    <div class="connection-line"></div>
+                                    <div class="device-pc">🖥️</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feature-content">
+                            <div class="feature-header">
+                                <h3 class="feature-title">Easy Connection</h3>
+                            </div>
+                            <p class="feature-description">One-click connection via USB or WiFi with instant setup.</p>
+                            <div class="feature-stats">
+                                <div class="stat-item">
+                                    <span class="stat-value">1-Click</span>
+                                    <span class="stat-label">Setup</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">USB/WiFi</span>
+                                    <span class="stat-label">Options</span>
+                                </div>
+                            </div>
+                            <div class="feature-action">
+                                <button class="feature-btn" onclick="showFeatureDemo('connection')">
+                                    <span class="btn-text">See in Action</span>
+                                    <span class="btn-arrow">→</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 4: Gaming Optimized -->
+                    <div class="feature-showcase-item" data-feature="gaming">
+                        <div class="feature-visual">
+                            <div class="feature-circle">
+                                <div class="feature-icon-wrapper">
+                                    <span class="feature-icon">🎮</span>
+                                    <div class="icon-glow"></div>
+                                </div>
+                                <div class="gaming-indicator">
+                                    <div class="game-controller">🎮</div>
+                                    <div class="performance-dots">
+                                        <div class="dot"></div>
+                                        <div class="dot"></div>
+                                        <div class="dot"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feature-content">
+                            <div class="feature-header">
+                                <h3 class="feature-title">Gaming Optimized</h3>
+                            </div>
+                            <p class="feature-description">Optimized for mobile gaming with zero input lag performance.</p>
+                            <div class="feature-stats">
+                                <div class="stat-item">
+                                    <span class="stat-value">0ms</span>
+                                    <span class="stat-label">Input Lag</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">Pro</span>
+                                    <span class="stat-label">Mode</span>
+                                </div>
+                            </div>
+                            <div class="feature-action">
+                                <button class="feature-btn" onclick="showFeatureDemo('gaming')">
+                                    <span class="btn-text">See in Action</span>
+                                    <span class="btn-arrow">→</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 5: Recording & Streaming -->
+                    <div class="feature-showcase-item" data-feature="recording">
+                        <div class="feature-visual">
+                            <div class="feature-circle">
+                                <div class="feature-icon-wrapper">
+                                    <span class="feature-icon">📊</span>
+                                    <div class="icon-glow"></div>
+                                </div>
+                                <div class="recording-indicator">
+                                    <div class="record-button">
+                                        <div class="record-dot"></div>
+                                    </div>
+                                    <div class="audio-waves">
+                                        <div class="wave"></div>
+                                        <div class="wave"></div>
+                                        <div class="wave"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feature-content">
+                            <div class="feature-header">
+                                <h3 class="feature-title">Recording & Streaming</h3>
+                            </div>
+                            <p class="feature-description">Built-in 4K recording and live streaming for content creation.</p>
+                            <div class="feature-stats">
+                                <div class="stat-item">
+                                    <span class="stat-value">4K</span>
+                                    <span class="stat-label">Recording</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">Live</span>
+                                    <span class="stat-label">Stream</span>
+                                </div>
+                            </div>
+                            <div class="feature-action">
+                                <button class="feature-btn" onclick="showFeatureDemo('recording')">
+                                    <span class="btn-text">See in Action</span>
+                                    <span class="btn-arrow">→</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 6: Secure & Private -->
+                    <div class="feature-showcase-item" data-feature="security">
+                        <div class="feature-visual">
+                            <div class="feature-circle">
+                                <div class="feature-icon-wrapper">
+                                    <span class="feature-icon">🛡️</span>
+                                    <div class="icon-glow"></div>
+                                </div>
+                                <div class="security-indicator">
+                                    <div class="shield-icon">🛡️</div>
+                                    <div class="security-rings">
+                                        <div class="ring"></div>
+                                        <div class="ring"></div>
+                                        <div class="ring"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feature-content">
+                            <div class="feature-header">
+                                <h3 class="feature-title">Secure & Private</h3>
+                            </div>
+                            <p class="feature-description">Your data stays private with 256-bit encryption protection.</p>
+                            <div class="feature-stats">
+                                <div class="stat-item">
+                                    <span class="stat-value">256-bit</span>
+                                    <span class="stat-label">Encryption</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">Local</span>
+                                    <span class="stat-label">Processing</span>
+                                </div>
+                            </div>
+                            <div class="feature-action">
+                                <button class="feature-btn" onclick="showFeatureDemo('security')">
+                                    <span class="btn-text">See in Action</span>
+                                    <span class="btn-arrow">→</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+
+        <!-- Guide Section -->
+        <section id="guide" class="guide-section">
+            <div class="guide-container">
+                <div class="guide-header">
+                    <h2 class="guide-title">Get Started in <span class="highlight-text">4 Steps</span></h2>
+                    <p class="guide-subtitle">Transform your setup experience with our streamlined process</p>
+                </div>
+                
+                <div class="guide-timeline">
+                    <div class="timeline-line"></div>
+                    
+                    <div class="guide-step">
+                        <div class="step-visual">
+                            <div class="step-circle">
+                                <span class="step-number">1</span>
+                                <div class="step-pulse"></div>
+                            </div>
+                            <div class="step-connector"></div>
+                        </div>
+                        <div class="step-content">
+                            <div class="step-header">
+                                <div class="step-icon">📥</div>
+                                <h3 class="step-title">Download & Install</h3>
+                            </div>
+                            <p class="step-description">Get Mirror Web on your PC with our smart installer that handles everything automatically.</p>
+                            <div class="step-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 25%"></div>
+                                </div>
+                                <span class="progress-text">25% Complete</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="guide-step">
+                        <div class="step-visual">
+                            <div class="step-circle">
+                                <span class="step-number">2</span>
+                                <div class="step-pulse"></div>
+                            </div>
+                            <div class="step-connector"></div>
+                        </div>
+                        <div class="step-content">
+                            <div class="step-header">
+                                <div class="step-icon">⚙️</div>
+                                <h3 class="step-title">Enable Developer Mode</h3>
+                            </div>
+                            <p class="step-description">Unlock your Android's potential by enabling USB debugging in just a few taps.</p>
+                            <div class="step-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 50%"></div>
+                                </div>
+                                <span class="progress-text">50% Complete</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="guide-step">
+                        <div class="step-visual">
+                            <div class="step-circle">
+                                <span class="step-number">3</span>
+                                <div class="step-pulse"></div>
+                            </div>
+                            <div class="step-connector"></div>
+                        </div>
+                        <div class="step-content">
+                            <div class="step-header">
+                                <div class="step-icon">🔗</div>
+                                <h3 class="step-title">Connect & Sync</h3>
+                            </div>
+                            <p class="step-description">Link your devices seamlessly via USB or WiFi for instant mirroring capability.</p>
+                            <div class="step-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 75%"></div>
+                                </div>
+                                <span class="progress-text">75% Complete</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="guide-step">
+                        <div class="step-visual">
+                            <div class="step-circle">
+                                <span class="step-number">4</span>
+                                <div class="step-pulse"></div>
+                            </div>
+                        </div>
+                        <div class="step-content">
+                            <div class="step-header">
+                                <div class="step-icon">🎯</div>
+                                <h3 class="step-title">Start Mirroring</h3>
+                            </div>
+                            <p class="step-description">Launch Mirror Web and experience professional-grade screen projection instantly.</p>
+                            <div class="step-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 100%"></div>
+                                </div>
+                                <span class="progress-text">100% Complete</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="guide-cta">
+                    <button class="guide-cta-btn" onclick="showGuideModal()">
+                        <span class="btn-glow"></span>
+                        <span class="btn-content">
+                            <span class="btn-icon">📖</span>
+                            <span class="btn-text">View Complete Guide</span>
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Section -->
+        <section id="pricing" class="pricing-section">
+            <div class="pricing-container">
+                <div class="pricing-header">
+                    <h2 class="pricing-title">Choose Your <span class="highlight-text">Plan</span></h2>
+                    <p class="pricing-subtitle">Flexible pricing options to suit your needs</p>
+                </div>
+                
+                <div class="pricing-cards">
+                    <!-- Free Trial Plan -->
+                    <div class="pricing-card trial">
+                        <div class="card-header">
+                            <div class="plan-icon">🚀</div>
+                            <h3 class="plan-name">Free Trial</h3>
+                            <div class="plan-badge">7 Days</div>
+                        </div>
+                        <div class="plan-price">
+                            <span class="currency">$</span>
+                            <span class="amount">0</span>
+                            <span class="period">/trial</span>
+                        </div>
+                        <div class="plan-features">
+                            <div class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">Full feature access</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">HD quality mirroring</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">Basic recording</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">Email support</span>
+                            </div>
+                        </div>
+                        <button class="pricing-btn trial-btn">
+                            <span class="btn-text">Start Free Trial</span>
+                            <span class="btn-arrow">→</span>
+                        </button>
+                    </div>
+
+                    <!-- Professional Plan -->
+                    <div class="pricing-card professional">
+                        <div class="popular-badge">Most Popular</div>
+                        <div class="card-header">
+                            <div class="plan-icon">⭐</div>
+                            <h3 class="plan-name">Professional</h3>
+                            <div class="plan-badge">Lifetime</div>
+                        </div>
+                        <div class="plan-price">
+                            <span class="currency">$</span>
+                            <span class="amount">49</span>
+                            <span class="period">/one-time</span>
+                        </div>
+                        <div class="plan-features">
+                            <div class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">All trial features</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">4K recording</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">Live streaming</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">Priority support</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">Advanced settings</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">Lifetime updates</span>
+                            </div>
+                        </div>
+                        <button class="pricing-btn professional-btn">
+                            <span class="btn-text">Get Professional</span>
+                            <span class="btn-arrow">→</span>
+                        </button>
+                    </div>
+
+                    <!-- Enterprise Plan -->
+                    <div class="pricing-card enterprise">
+                        <div class="card-header">
+                            <div class="plan-icon">🏢</div>
+                            <h3 class="plan-name">Enterprise</h3>
+                            <div class="plan-badge">Custom</div>
+                        </div>
+                        <div class="plan-price">
+                            <span class="currency">$</span>
+                            <span class="amount">199</span>
+                            <span class="period">/year</span>
+                        </div>
+                        <div class="plan-features">
+                            <div class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">All professional features</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">Multi-device support</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">Team management</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">Custom integrations</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">Dedicated support</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">SLA guarantee</span>
+                            </div>
+                        </div>
+                        <button class="pricing-btn enterprise-btn">
+                            <span class="btn-text">Contact Sales</span>
+                            <span class="btn-arrow">→</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section id="faq" class="faq-section">
+            <div class="faq-container">
+                <div class="faq-header">
+                    <h2 class="faq-title">Frequently Asked <span class="highlight-text">Questions</span></h2>
+                    <p class="faq-subtitle">Everything you need to know about Mirror Web</p>
+                </div>
+                
+                <div class="faq-grid">
+                    <!-- FAQ Item 1 -->
+                    <div class="faq-item" data-faq="1">
+                        <div class="faq-question">
+                            <div class="faq-icon">
+                                <span class="faq-icon-text">⚡</span>
+                                <div class="faq-icon-glow"></div>
+                            </div>
+                            <h3 class="faq-question-text">How does Mirror Web work?</h3>
+                            <div class="faq-toggle">
+                                <span class="toggle-line"></span>
+                                <span class="toggle-line"></span>
+                            </div>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="answer-content">
+                                <p>Mirror Web uses advanced screen mirroring technology to create a seamless connection between your Android device and PC. Simply connect via USB or WiFi, and your phone's screen will be instantly projected to your computer with ultra-low latency and HD quality.</p>
+                                <div class="answer-features">
+                                    <div class="answer-feature">
+                                        <span class="feature-dot">⚡</span>
+                                        <span>Instant connection</span>
+                                    </div>
+                                    <div class="answer-feature">
+                                        <span class="feature-dot">🎯</span>
+                                        <span>HD quality output</span>
+                                    </div>
+                                    <div class="answer-feature">
+                                        <span class="feature-dot">🔒</span>
+                                        <span>Secure & private</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Item 2 -->
+                    <div class="faq-item" data-faq="2">
+                        <div class="faq-question">
+                            <div class="faq-icon">
+                                <span class="faq-icon-text">📱</span>
+                                <div class="faq-icon-glow"></div>
+                            </div>
+                            <h3 class="faq-question-text">What devices are supported?</h3>
+                            <div class="faq-toggle">
+                                <span class="toggle-line"></span>
+                                <span class="toggle-line"></span>
+                            </div>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="answer-content">
+                                <p>Mirror Web supports all Android devices running Android 5.0 and above. For PC, we support Windows 10/11, macOS 10.14+, and Linux distributions. The software automatically detects your device and optimizes settings for the best performance.</p>
+                                <div class="answer-features">
+                                    <div class="answer-feature">
+                                        <span class="feature-dot">📱</span>
+                                        <span>Android 5.0+</span>
+                                    </div>
+                                    <div class="answer-feature">
+                                        <span class="feature-dot">🖥️</span>
+                                        <span>Windows 10/11</span>
+                                    </div>
+                                    <div class="answer-feature">
+                                        <span class="feature-dot">🍎</span>
+                                        <span>macOS 10.14+</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Item 3 -->
+                    <div class="faq-item" data-faq="3">
+                        <div class="faq-question">
+                            <div class="faq-icon">
+                                <span class="faq-icon-text">🎁</span>
+                                <div class="faq-icon-glow"></div>
+                            </div>
+                            <h3 class="faq-question-text">Is there a free trial available?</h3>
+                            <div class="faq-toggle">
+                                <span class="toggle-line"></span>
+                                <span class="toggle-line"></span>
+                            </div>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="answer-content">
+                                <p>Yes! We offer a 7-day free trial with full access to all features. No credit card required. Experience the full power of Mirror Web before making your decision. After the trial, you can choose from our flexible pricing plans.</p>
+                                <div class="answer-features">
+                                    <div class="answer-feature">
+                                        <span class="feature-dot">🎁</span>
+                                        <span>7-day free trial</span>
+                                    </div>
+                                    <div class="answer-feature">
+                                        <span class="feature-dot">💳</span>
+                                        <span>No credit card</span>
+                                    </div>
+                                    <div class="answer-feature">
+                                        <span class="feature-dot">✨</span>
+                                        <span>Full features</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Item 4 -->
+                    <div class="faq-item" data-faq="4">
+                        <div class="faq-question">
+                            <div class="faq-icon">
+                                <span class="faq-icon-text">🎬</span>
+                                <div class="faq-icon-glow"></div>
+                            </div>
+                            <h3 class="faq-question-text">Can I record my screen while mirroring?</h3>
+                            <div class="faq-toggle">
+                                <span class="toggle-line"></span>
+                                <span class="toggle-line"></span>
+                            </div>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="answer-content">
+                                <p>Absolutely! Mirror Web includes built-in recording capabilities. You can record your mirrored screen in up to 4K resolution with audio. Perfect for creating tutorials, gameplay videos, or documenting your mobile workflow.</p>
+                                <div class="answer-features">
+                                    <div class="answer-feature">
+                                        <span class="feature-dot">🎬</span>
+                                        <span>4K recording</span>
+                                    </div>
+                                    <div class="answer-feature">
+                                        <span class="feature-dot">🎵</span>
+                                        <span>Audio included</span>
+                                    </div>
+                                    <div class="answer-feature">
+                                        <span class="feature-dot">📹</span>
+                                        <span>Built-in feature</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Item 5 -->
+                    <div class="faq-item" data-faq="5">
+                        <div class="faq-question">
+                            <div class="faq-icon">
+                                <span class="faq-icon-text">🔐</span>
+                                <div class="faq-icon-glow"></div>
+                            </div>
+                            <h3 class="faq-question-text">How secure is my data?</h3>
+                            <div class="faq-toggle">
+                                <span class="toggle-line"></span>
+                                <span class="toggle-line"></span>
+                            </div>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="answer-content">
+                                <p>Your privacy and security are our top priorities. Mirror Web uses 256-bit encryption and processes all data locally on your device. We never store, transmit, or access your personal information or screen content.</p>
+                                <div class="answer-features">
+                                    <div class="answer-feature">
+                                        <span class="feature-dot">🔐</span>
+                                        <span>256-bit encryption</span>
+                                    </div>
+                                    <div class="answer-feature">
+                                        <span class="feature-dot">🏠</span>
+                                        <span>Local processing</span>
+                                    </div>
+                                    <div class="answer-feature">
+                                        <span class="feature-dot">🛡️</span>
+                                        <span>Zero data collection</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Item 6 -->
+                    <div class="faq-item" data-faq="6">
+                        <div class="faq-question">
+                            <div class="faq-icon">
+                                <span class="faq-icon-text">💬</span>
+                                <div class="faq-icon-glow"></div>
+                            </div>
+                            <h3 class="faq-question-text">What if I need technical support?</h3>
+                            <div class="faq-toggle">
+                                <span class="toggle-line"></span>
+                                <span class="toggle-line"></span>
+                            </div>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="answer-content">
+                                <p>We provide comprehensive technical support for all users. Free trial users get email support, while Professional and Enterprise users receive priority support with faster response times and dedicated assistance.</p>
+                                <div class="answer-features">
+                                    <div class="answer-feature">
+                                        <span class="feature-dot">📧</span>
+                                        <span>Email support</span>
+                                    </div>
+                                    <div class="answer-feature">
+                                        <span class="feature-dot">⚡</span>
+                                        <span>Priority response</span>
+                                    </div>
+                                    <div class="answer-feature">
+                                        <span class="feature-dot">👨‍💻</span>
+                                        <span>Expert assistance</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-cta">
+                    <div class="faq-cta-content">
+                        <h3 class="faq-cta-title">Still have <span class="highlight-text">questions</span>?</h3>
+                        <p class="faq-cta-text">Our support team is here to help you get the most out of Mirror Web</p>
+                        <button class="faq-cta-btn">
+                            <span class="btn-icon">💬</span>
+                            Contact Support
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Download Section -->
+        <section id="download" class="download-section">
+            <div class="download-container">
+                <div class="download-header">
+                    <h2 class="download-title">Ready to Mirror Your <span class="highlight-text">Screen</span>?</h2>
+                    <p class="download-description">Download Mirror Web today and experience professional-grade screen projection technology.</p>
+                </div>
+                <div class="download-buttons">
+                    <button class="download-btn-main android">
+                        <span class="play-icon">▶</span>
+                        Download Mirror Web
+                    </button>
+                    <button class="download-btn-main ios">
+                        <span class="apple-icon">📱</span>
+                        View Demo
+                    </button>
+                </div>
+                <p class="download-disclaimer">Free trial available • Professional features unlocked</p>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-container">
+                <div class="footer-content">
+                    <div class="footer-logo">
+                        <h3 class="footer-logo-text">Mirror Web</h3>
+                    </div>
+                    <div class="footer-links">
+                        <a href="#features" class="footer-link">Features</a>
+                        <a href="#download" class="footer-link">Download</a>
+                        <a href="#" class="footer-link">Privacy Policy</a>
+                        <a href="#" class="footer-link">Terms of Service</a>
+                    </div>
+                </div>
+                <div class="footer-copyright">
+                    <p>© 2024 Mirror Web. Professional Screen Projection Software.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="pricing-connector.js"></script>
+    <script src="admin-fix.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize auth status
+            checkAuthStatus();
+            
+            // Set up logout button
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    await signOut();
+                    window.location.reload();
+                });
+            }
+        });
+    </script>
+</body>
+</html> 

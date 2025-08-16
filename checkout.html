@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Mirror Web</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="checkout-styles.css">
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        /* Profile Dropdown Styles */
+        .nav-profile {
+            position: relative;
+            display: block !important; /* Force display for debugging */
+        }
+
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .profile-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .profile-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, #00d4ff, #00ff88);
+            border-radius: 50px;
+            z-index: -1;
+            padding: 1px;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+        }
+
+        .profile-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .profile-btn:hover::before {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+        }
+
+        .profile-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00d4ff, #00ff88);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1a1a2e;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .profile-name {
+            color: #fff;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .dropdown-arrow {
+            color: #00d4ff;
+            font-size: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .profile-dropdown:hover .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 8px 0;
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .profile-dropdown:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: #fff;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+            margin: 0 8px;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(0, 212, 255, 0.1);
+            color: #00d4ff;
+        }
+
+        .item-icon {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 8px 0;
+        }
+
+        .admin-link {
+            display: none;
+        }
+        
+        /* Ensure profile dropdown is visible */
+        .navbar .nav-container .nav-profile {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        /* Force profile dropdown to be visible */
+        #nav-profile {
+            display: block !important;
+        }
+        
+        .navbar {
+            position: relative;
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="background-dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>
+    <div class="background-stars">
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+        <div class="star-bg">★</div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="index.html" style="text-decoration: none;">
+                    <h2 class="logo-text">Mirror Web</h2>
+                </a>
+            </div>
+            <div class="nav-links">
+                <a href="index.html#features" class="nav-link">Features</a>
+                <a href="index.html#download" class="nav-link">Download</a>
+                <a href="index.html#guide" class="nav-link">Guide</a>
+                <a href="index.html#contact" class="nav-link">Contact</a>
+            </div>
+            <div class="nav-profile" id="nav-profile">
+                <div class="profile-dropdown">
+                    <div class="profile-btn">
+                        <div class="profile-avatar">
+                            <span class="avatar-text">JD</span>
+                        </div>
+                        <span class="profile-name">John Doe</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
+                    <div class="dropdown-menu">
+                        <a href="profile.html" class="dropdown-item">
+                            <span class="item-icon">👤</span>
+                            <span>My Profile</span>
+                        </a>
+                        <a href="profile.html#account-tab" class="dropdown-item">
+                            <span class="item-icon">⚙️</span>
+                            <span>Settings</span>
+                        </a>
+                        <a href="admin-dashboard.html" class="dropdown-item admin-link" style="display:none;">
+                            <span class="item-icon">🔐</span>
+                            <span>Admin</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item" id="logout-btn">
+                            <span class="item-icon">🚪</span>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Stars Background -->
+    <div class="stars-container">
+        <div class="stars"></div>
+        <div class="stars2"></div>
+        <div class="stars3"></div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="checkout-hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Complete Your Purchase</h1>
+            <p class="hero-subtitle">You're just one step away from unlocking premium screen sharing features</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="checkout-main">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+        
+        <div class="checkout-container">
+            <!-- Order Summary Card -->
+            <div class="order-summary-card">
+                <div class="summary-header">
+                    <div class="summary-icon">🎯</div>
+                    <h2 class="summary-title">Order Summary</h2>
+                </div>
+                
+                <div class="package-card">
+                    <div class="package-badge" id="package-badge">Pro</div>
+                    <div class="package-info">
+                        <h3 id="package-name">Pro Plan</h3>
+                        <p id="package-description">Advanced screen sharing with premium features</p>
+                    </div>
+                    <div class="package-price">
+                        <span class="price-amount" id="price-amount">$9.99</span>
+                        <span class="price-period" id="price-period">/month</span>
+                    </div>
+                </div>
+                
+
+
+                <div class="total-section">
+                    <div class="total-row">
+                        <span>Subtotal:</span>
+                        <span id="subtotal">$9.99</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Tax:</span>
+                        <span id="tax">$0.00</span>
+                    </div>
+                    <div class="total-row total-final">
+                        <span>Total:</span>
+                        <span id="total">$9.99</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Checkout Form Card -->
+            <div class="checkout-form-card">
+                <div class="form-header">
+                    <div class="form-icon">💳</div>
+                    <h2 class="form-title">Payment Details</h2>
+                </div>
+                
+                <!-- Payment Method Selection -->
+                <div class="payment-method-section">
+                    <h3 class="section-title">Payment Method</h3>
+                    <div class="payment-methods">
+                        <label class="payment-method-option">
+                            <input type="radio" name="payment-method" value="stripe" checked>
+                            <span class="payment-method-card">
+                                <div class="payment-icon">💳</div>
+                                <div class="payment-info">
+                                    <span class="payment-name">Credit/Debit Card</span>
+                                    <span class="payment-description">Visa, Mastercard, American Express</span>
+                                </div>
+                            </span>
+                        </label>
+                        
+                        <label class="payment-method-option">
+                            <input type="radio" name="payment-method" value="crypto">
+                            <span class="payment-method-card">
+                                <div class="payment-icon">₿</div>
+                                <div class="payment-info">
+                                    <span class="payment-name">Cryptocurrency</span>
+                                    <span class="payment-description">Bitcoin, Ethereum, USDC, USDT</span>
+                                </div>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Stripe Elements Container -->
+                <div id="stripe-container" class="stripe-container">
+                    <div class="form-group">
+                        <label class="form-label">Card Information</label>
+                        <div id="card-element" class="card-element">
+                            <!-- Stripe Card Element will be inserted here -->
+                        </div>
+                        <div id="card-errors" class="card-errors" role="alert"></div>
+                    </div>
+                </div>
+
+                <!-- Crypto Payment Container -->
+                <div id="crypto-container" class="crypto-container" style="display: none;">
+                    <div class="crypto-payment-methods">
+                        <div class="crypto-option" data-crypto="btc">
+                            <div class="crypto-icon">₿</div>
+                            <div class="crypto-info">
+                                <span class="crypto-name">Bitcoin (BTC)</span>
+                                <span class="crypto-amount" id="btc-amount">Calculating...</span>
+                            </div>
+                        </div>
+                        
+                        <div class="crypto-option" data-crypto="eth">
+                            <div class="crypto-icon">Ξ</div>
+                            <div class="crypto-info">
+                                <span class="crypto-name">Ethereum (ETH)</span>
+                                <span class="crypto-amount" id="eth-amount">Calculating...</span>
+                            </div>
+                        </div>
+                        
+                        <div class="crypto-option" data-crypto="usdc">
+                            <div class="crypto-icon">💎</div>
+                            <div class="crypto-info">
+                                <span class="crypto-name">USDC</span>
+                                <span class="crypto-amount" id="usdc-amount">Calculating...</span>
+                            </div>
+                        </div>
+                        
+                        <div class="crypto-option" data-crypto="usdt">
+                            <div class="crypto-icon">💎</div>
+                            <div class="crypto-info">
+                                <span class="crypto-name">USDT</span>
+                                <span class="crypto-amount" id="usdt-amount">Calculating...</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="crypto-price-controls">
+                        <button type="button" class="refresh-prices-btn" onclick="refreshCryptoPrices()">
+                            🔄 Refresh Prices
+                        </button>
+                        <span class="price-timestamp" id="price-timestamp">Prices updated: Never</span>
+                    </div>
+                    
+                    <div class="crypto-wallet-section">
+                        <h4>Connect Your Wallet</h4>
+                        <div class="wallet-buttons">
+                            <button type="button" class="wallet-btn" data-wallet="metamask">
+                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIxLjQ5IDQuMjNDMjEuODIgNC42IDIxLjgyIDUuMTUgMjEuNDkgNS41OEwxMy4wMSAxNC4wNkwyMS40OSAyMi41NEMyMS44MiAyMi45NyAyMS44MiAyMy41MiAyMS40OSAyMy45NUMyMS4xNiAyNC4zOCAyMC42MSAyNC4zOCAyMC4yOCAyMy45NUwxMS44IDE1LjQ3TDMuMzIgMjMuOTVDMi45OSAyNC4zOCAyLjQ0IDI0LjM4IDIuMTEgMjMuOTVDMS43OCAyMy41MiAxLjc4IDIyLjk3IDIuMTEgMjIuNTVMMTAuNTkgMTQuMDdMMi4xMSA1LjU4QzEuNzggNS4xNSAxLjc4IDQuNiAyLjExIDQuMTdDMi40NCAzLjc0IDIuOTkgMy43NCAzLjMyIDQuMTdMMTEuOCAxMi42NUwyMC4yOCA0LjE3QzIwLjYxIDMuNzQgMjEuMTYgMy43NCAyMS40OSA0LjE3WiIgZmlsbD0iI2ZmZiIvPgo8L3N2Zz4K" alt="MetaMask" class="wallet-icon">
+                                MetaMask
+                            </button>
+                            <button type="button" class="wallet-btn" data-wallet="walletconnect">
+                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIxLjQ5IDQuMjNDMjEuODIgNC42IDIxLjgyIDUuMTUgMjEuNDkgNS41OEwxMy4wMSAxNC4wNkwyMS40OSAyMi41NEMyMS44MiAyMi45NyAyMS44MiAyMy41MiAyMS40OSAyMy45NUMyMS4xNiAyNC4zOCAyMC42MSAyNC4zOCAyMC4yOCAyMy45NUwxMS44IDE1LjQ3TDMuMzIgMjMuOTVDMi45OSAyNC4zOCAyLjQ0IDI0LjM4IDIuMTEgMjMuOTVDMS43OCAyMy41MiAxLjc4IDIyLjk3IDIuMTEgMjIuNTVMMTAuNTkgMTQuMDdMMi4xMSA1LjU4QzEuNzggNS4xNSAxLjc4IDQuNiAyLjExIDQuMTdDMi40NCAzLjc0IDIuOTkgMy43NCAzLjMyIDQuMTdMMTEuOCAxMi42NUwyMC4yOCA0LjE3QzIwLjYxIDMuNzQgMjEuMTYgMy43NCAyMS40OSA0LjE3WiIgZmlsbD0iI2ZmZiIvPgo8L3N2Zz4K" alt="WalletConnect" class="wallet-icon">
+                                WalletConnect
+                            </button>
+                            <button type="button" class="wallet-btn" data-wallet="coinbase">
+                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIxLjQ5IDQuMjNDMjEuODIgNC42IDIxLjgyIDUuMTUgMjEuNDkgNS41OEwxMy4wMSAxNC4wNkwyMS40OSAyMi41NEMyMS44MiAyMi45NyAyMS44MiAyMy41MiAyMS40OSAyMy45NUMyMS4xNiAyNC4zOCAyMC42MSAyNC4zOCAyMC4yOCAyMy45NUwxMS44IDE1LjQ3TDMuMzIgMjMuOTVDMi45OSAyNC4zOCAyLjQ0IDI0LjM4IDIuMTEgMjMuOTVDMS43OCAyMy41MiAxLjc4IDIyLjk3IDIuMTEgMjIuNTVMMTAuNTkgMTQuMDdMMi4xMSA1LjU4QzEuNzggNS4xNSAxLjc4IDQuNiAyLjExIDQuMTdDMi40NCAzLjc0IDIuOTkgMy43NCAzLjMyIDQuMTdMMTEuOCAxMi42NUwyMC4yOCA0LjE3QzIwLjYxIDMuNzQgMjEuMTYgMy43NCAyMS40OSA0LjE3WiIgZmlsbD0iI2ZmZiIvPgo8L3N2Zz4K" alt="Coinbase" class="wallet-icon">
+                                Coinbase Wallet
+                            </button>
+                        </div>
+                        
+                        <div class="wallet-status" id="wallet-status">
+                            <span class="status-text">Please connect your wallet to continue</span>
+                        </div>
+                        <div class="wallet-help">
+                            <p class="help-text">💡 <strong>Recommended:</strong> Install MetaMask extension for the best experience</p>
+                            <p class="help-text">🔗 <a href="https://metamask.io" target="_blank" class="help-link">Download MetaMask</a></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Billing Information -->
+                <div class="billing-section">
+                    <h3 class="section-title">Billing Information</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" id="email" class="form-input" placeholder="your@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="name" class="form-label">Full Name</label>
+                            <input type="text" id="name" class="form-input" placeholder="John Doe" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" id="phone" class="form-input" placeholder="+1 (555) 123-4567">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terms and Conditions -->
+                <div class="terms-section">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="terms" required>
+                        <span class="checkmark"></span>
+                        <span class="terms-text">
+                            I agree to the <a href="#" class="terms-link">Terms of Service</a> and <a href="#" class="terms-link">Privacy Policy</a>
+                        </span>
+                    </label>
+                </div>
+
+                <!-- Payment Button -->
+                <button id="submit-button" class="checkout-btn" disabled>
+                    <span class="btn-text">Pay Now</span>
+                    <div class="spinner"></div>
+                </button>
+
+                <!-- Security Notice -->
+                <div class="security-notice">
+                    <div class="security-icon">🔒</div>
+                    <div class="security-text">
+                        <h4>Secure Payment</h4>
+                        <p>Your payment information is encrypted and secure. We never store your card details.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h3 class="footer-logo-text">Mirror Web</h3>
+                </div>
+                <div class="footer-links">
+                    <a href="#features" class="footer-link">Features</a>
+                    <a href="#download" class="footer-link">Download</a>
+                    <a href="#" class="footer-link">Privacy Policy</a>
+                    <a href="#" class="footer-link">Terms of Service</a>
+                </div>
+            </div>
+            <div class="footer-copyright">
+                <p>© 2024 Mirror Web. Professional Screen Projection Software.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Processing your payment...</p>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="modal" style="display: none;">
+                    <div class="modal-content">
+                <div class="success-icon">🎉</div>
+                <h2>Payment Successful!</h2>
+                <p>Your subscription is now active. Start sharing your screen with premium features!</p>
+                            <div class="modal-actions">
+                    <button class="btn-primary" onclick="goToHome()">Go to Home</button>
+                    <button class="btn-secondary" onclick="closeSuccessModal()">Close</button>
+                </div>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div id="error-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="error-icon">❌</div>
+            <h2>Payment Failed</h2>
+            <p id="error-message">There was an issue processing your payment. Please try again.</p>
+            <div class="modal-actions">
+                <button class="btn-primary" onclick="closeErrorModal()">Try Again</button>
+                <button class="btn-secondary" onclick="closeErrorModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="supabase.js"></script>
+    <script src="checkout.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize auth status and show/hide profile dropdown
+            checkAuthStatus();
+            
+            // Set up logout button
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    await signOut();
+                    window.location.reload();
+                });
+            }
+        });
+
+        // Function to initialize authentication UI - Same as home page
+        async function initializeAuthUI() {
+            try {
+                alert('Function is running! Checking user...');
+                
+                const { data: { user }, error } = await supabase.auth.getUser();
+                
+                if (error) {
+                    console.error('Error checking auth status:', error);
+                    return;
+                }
+
+                const navProfile = document.getElementById('nav-profile');
+                const profileName = document.querySelector('.profile-name');
+                const avatarText = document.querySelector('.avatar-text');
+                const adminLink = document.querySelector('.admin-link');
+
+                if (user) {
+                    // User is logged in, show profile dropdown
+                    if (navProfile) {
+                        navProfile.style.display = 'block';
+                    }
+                    
+                    // Get real user data from profiles table (same as home page)
+                    console.log('User ID:', user.id);
+                    console.log('User email:', user.email);
+                    
+                    const { data: profileData, error: profileError } = await supabase
+                        .from('profiles')
+                        .select('first_name, last_name, email, is_admin')
+                        .eq('id', user.id)
+                        .maybeSingle();
+                    
+                    console.log('Profile data:', profileData);
+                    console.log('Profile error:', profileError);
+                    
+                    if (!profileError && profileData) {
+                        // Use database profile data for real user information
+                        const dbFirstName = profileData.first_name || '';
+                        const dbLastName = profileData.last_name || '';
+                        const dbFullName = `${dbFirstName} ${dbLastName}`.trim();
+                        
+                        if (profileName) {
+                            if (dbFullName && dbFullName !== ' ') {
+                                profileName.textContent = dbFullName;
+                                console.log('✅ Updated profile name to:', dbFullName);
+                            } else {
+                                // Fallback to user metadata or email
+                                const firstName = user.user_metadata?.first_name || user.user_metadata?.firstName || '';
+                                const lastName = user.user_metadata?.last_name || user.user_metadata?.lastName || '';
+                                const fallbackName = `${firstName} ${lastName}`.trim() || user.email?.split('@')[0] || 'User';
+                                profileName.textContent = fallbackName;
+                                console.log('⚠️ Using fallback name:', fallbackName);
+                            }
+                        }
+                        
+                        if (avatarText) {
+                            if (dbFirstName && dbLastName) {
+                                avatarText.textContent = `${dbFirstName[0]}${dbLastName[0]}`.toUpperCase();
+                            } else {
+                                // Fallback to user metadata or email
+                                const firstName = user.user_metadata?.first_name || user.user_metadata?.firstName || '';
+                                const lastName = user.user_metadata?.last_name || user.user_metadata?.lastName || '';
+                                if (firstName && lastName) {
+                                    avatarText.textContent = `${firstName[0]}${lastName[0]}`.toUpperCase();
+                                } else {
+                                    avatarText.textContent = user.email?.[0]?.toUpperCase() || 'U';
+                                }
+                            }
+                        }
+                        
+                        // Show admin link if user is admin
+                        if (adminLink && profileData.is_admin === true) {
+                            adminLink.style.display = 'block';
+                        }
+                    } else {
+                        // Fallback to user metadata if no profile data
+                        if (profileName) {
+                            const firstName = user.user_metadata?.first_name || user.user_metadata?.firstName || '';
+                            const lastName = user.user_metadata?.last_name || user.user_metadata?.lastName || '';
+                            const fallbackName = `${firstName} ${lastName}`.trim() || user.email?.split('@')[0] || 'User';
+                            profileName.textContent = fallbackName;
+                        }
+                        
+                        if (avatarText) {
+                            const firstName = user.user_metadata?.first_name || user.user_metadata?.firstName || '';
+                            const lastName = user.user_metadata?.last_name || user.user_metadata?.lastName || '';
+                            if (firstName && lastName) {
+                                avatarText.textContent = `${firstName[0]}${lastName[0]}`.toUpperCase();
+                            } else {
+                                avatarText.textContent = user.email?.[0]?.toUpperCase() || 'U';
+                            }
+                        }
+                    }
+                } else {
+                    // User is not logged in, hide profile dropdown
+                    if (navProfile) navProfile.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error initializing auth UI:', error);
+            }
+        }
+    </script>
+</body>
+</html>
