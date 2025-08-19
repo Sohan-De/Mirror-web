@@ -1,348 +1,101 @@
-// Admin Dashboard JavaScript
+// Mirror Web Admin Dashboard - Fixed Version
+// This fixes the syntax errors and missing functions
 
 // Global variables
+let allUsers = [];
 let currentPage = 1;
 const usersPerPage = 10;
 let totalUsers = 0;
-let allUsers = [];
 
-// Initialize admin dashboard when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM content loaded, initializing admin dashboard');
-    
-    // Check if user is admin before proceeding
-    checkAdminAccess().then(() => {
-        console.log('Admin access confirmed, initializing dashboard');
-        initAdminDashboard();
-    }).catch(error => {
-        console.error('Error during admin access check:', error);
-    });
-    
-    // Add debug info
-    console.log('Supabase client available:', !!supabase);
-    if (supabase) {
-        console.log('Supabase URL:', supabase.supabaseUrl);
-        console.log('Supabase client initialized successfully');
-    }
-});
-
-// Check if user has admin access
-async function checkAdminAccess() {
+// Initialize admin dashboard
+async function initializeAdminDashboard() {
     try {
-        console.log('Checking admin access...');
+        console.log('Initializing admin dashboard...');
         
-        // Get current user
-        const { user, error: userError } = await getCurrentUser();
-        
-        if (userError || !user) {
-            console.error('Not logged in:', userError?.message || 'No user found');
-            alert('Please log in to access the admin dashboard.');
-            window.location.href = 'sign-in.html';
-            throw new Error('Not logged in');
+        // Check if user is admin
+        const isAdmin = await checkAdminStatus();
+        if (!isAdmin) {
+            showAccessDenied();
+            return;
         }
         
-        console.log('Current user:', user.id);
+        // Load initial data
+        await Promise.all([
+            loadUsers(),
+            loadAnalytics(),
+            loadAdminUsers(),
+            loadKeys()
+        ]);
         
-        // TEMPORARY WORKAROUND: Direct query to check admin status
-        // This bypasses the RLS policies that are causing the infinite recursion
-        try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('is_admin')
-                .eq('id', user.id)
-                .maybeSingle();
-            
-            if (error) {
-                // If we still get an error, try to continue anyway for debugging
-                console.warn('Error in direct admin check:', error.message);
-                console.warn('Proceeding anyway for debugging purposes');
-                return true;
-            }
-            
-            const isAdmin = !!data?.is_admin;
-            console.log('Admin status (direct check):', isAdmin);
-            
-            if (!isAdmin) {
-                // For testing purposes, we'll allow access anyway
-                console.warn('User is not an admin, but allowing access for debugging');
-                // Uncomment the following lines to enforce admin access:
-                // alert('Access denied. You do not have admin privileges.');
-                // window.location.href = 'index.html';
-                // throw new Error('Not an admin user');
-            }
-            
-            return true; // Successfully verified admin access (or bypassed for debugging)
-        } catch (directError) {
-            console.error('Error in direct admin check:', directError.message);
-            // Continue anyway for debugging purposes
-            return true;
-        }
+        console.log('Admin dashboard initialized successfully');
+        
     } catch (error) {
-        console.error('Error checking admin access:', error.message);
-        alert('Error checking admin access: ' + error.message);
-        throw error; // Re-throw to be caught by the caller
+        console.error('Error initializing admin dashboard:', error);
+        showErrorMessage('Failed to initialize dashboard: ' + error.message);
     }
 }
 
-// Initialize admin dashboard
-async function initAdminDashboard() {
+// Check if current user is admin
+async function checkAdminStatus() {
     try {
-        // Load users data
-        await loadUsers();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return false;
         
-
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', user.id)
+            .single();
         
-        // Load admin users
-        await loadAdminUsers();
-        
-        // Set up event listeners
-        const logoutLink = document.getElementById('logout-link');
-        if (logoutLink) {
-            logoutLink.addEventListener('click', async function(e) {
-                e.preventDefault();
-                await signOut();
-                window.location.href = 'index.html';
-            });
-        }
-        
-        // Set up search functionality
-        const searchInput = document.getElementById('user-search');
-        if (searchInput) {
-            searchInput.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase();
-                
-                if (searchTerm.length === 0) {
-                    // If search is empty, show all users
-                    displayUsers(allUsers);
-                } else {
-                    // Filter users based on search term
-                    const filteredUsers = allUsers.filter(user => {
-                        const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim().toLowerCase();
-                        const email = user.email ? user.email.toLowerCase() : '';
-                        return fullName.includes(searchTerm) || email.includes(searchTerm);
-                    });
-                    
-                    displayUsers(filteredUsers);
-                }
-            });
-        }
-        
-        // Set up pagination
-        const prevBtn = document.getElementById('prev-page');
-        const nextBtn = document.getElementById('next-page');
-        
-        if (prevBtn) {
-            prevBtn.addEventListener('click', function() {
-                if (currentPage > 1) {
-                    currentPage--;
-                    loadUsers();
-                }
-            });
-        }
-        
-        if (nextBtn) {
-            nextBtn.addEventListener('click', function() {
-                const totalPages = Math.ceil(totalUsers / usersPerPage);
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    loadUsers();
-                }
-            });
-        }
-        
+        return profile?.is_admin === true;
     } catch (error) {
-        console.error('Error initializing admin dashboard:', error.message);
+        console.error('Error checking admin status:', error);
+        return false;
     }
 }
 
 // Load users with pagination
-async function loadUsers() {
+async function loadUsers(page = 1) {
     try {
-        console.log('Loading users...');
-        const tableBody = document.getElementById('users-table-body');
-        if (!tableBody) {
-            console.error('users-table-body element not found!');
-            return;
-        }
+        currentPage = page;
+        const startIndex = (page - 1) * usersPerPage;
         
-        tableBody.innerHTML = '<tr class="loading-row"><td colspan="5">Loading users...</td></tr>';
-        
-        // Simple approach: Just get all profiles directly
-        console.log('Fetching all profiles from database...');
-        const { data: profiles, error: profilesError } = await supabase
+        const { data: users, error } = await supabase
             .from('profiles')
             .select('*')
+            .range(startIndex, startIndex + usersPerPage - 1)
             .order('created_at', { ascending: false });
         
-        if (profilesError) {
-            console.error('Profiles fetch error:', profilesError.message);
-            throw profilesError;
-        }
+        if (error) throw error;
         
-        console.log('Total profiles found:', profiles?.length || 0);
-        
-        if (!profiles || profiles.length === 0) {
-            console.log('No profiles found, creating test users...');
-            await createTwoMoreUsers();
-            return;
-        }
-        
-        // Convert profiles to user objects
-        const finalUsers = profiles.map(profile => ({
-            id: profile.id,
-            email: profile.email || `ID: ${profile.id.substring(0, 8)}...`,
-            first_name: profile.first_name || '',
-            last_name: profile.last_name || '',
-            subscription_tier: profile.subscription_tier || 'free',
-            subscription_status: profile.subscription_status || 'active',
-            is_admin: profile.is_admin || false,
-            created_at: profile.created_at,
-            last_sign_in: profile.updated_at,
-            email_confirmed: profile.email ? 'Yes' : 'No'
-        }));
-        
-        // Log detailed profile information for debugging
-        console.log('All profiles found:', finalUsers.map(u => ({
-            id: u.id,
-            email: u.email,
-            name: `${u.first_name} ${u.last_name}`,
-            subscription: u.subscription_tier,
-            is_admin: u.is_admin
-        })));
-        
-        console.log('Final users to display:', finalUsers.length);
-        
-        if (finalUsers.length === 0) {
-            console.warn('No users found from any source');
-            tableBody.innerHTML = '<tr class="loading-row"><td colspan="5">No users found. Please check your database.</td></tr>';
-            return;
-        }
-        
-        // Store all users for search functionality
-        allUsers = finalUsers;
-        totalUsers = finalUsers.length;
-        
-        // Display users
-        displayUsers(finalUsers);
-        
-        // Update pagination
-        updatePagination();
-        
-        console.log('Users loaded successfully:', finalUsers.length);
-        
-    } catch (error) {
-        console.error('Error loading users:', error.message);
-        // Fallback to profiles table only
-        await loadUsersFromProfiles();
-    }
-}
-
-// Fallback function to load users from profiles table only
-async function loadUsersFromProfiles() {
-    try {
-        console.log('Loading users from profiles table...');
-        
+        // Get total count
         const { count, error: countError } = await supabase
             .from('profiles')
             .select('*', { count: 'exact', head: true });
         
-        if (countError) {
-            console.error('Count error:', countError.message);
-            throw countError;
-        }
+        if (countError) throw countError;
+        totalUsers = count;
         
-        console.log('Total users from profiles:', count);
-        totalUsers = count || 0;
+        // Store users globally
+        allUsers = users;
         
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .order('created_at', { ascending: false });
-        
-        if (error) {
-            console.error('Data fetch error:', error.message);
-            throw error;
-        }
-        
-        console.log('Users data received:', data ? data.length : 0, 'users');
-        allUsers = data || [];
-        
-        displayUsers(data);
+        // Render users table
+        renderUsersTable(users);
         updatePagination();
         
     } catch (error) {
-        console.error('Error loading users from profiles:', error.message);
-        const tableBody = document.getElementById('users-table-body');
-        if (tableBody) {
-            tableBody.innerHTML = `<tr class="loading-row"><td colspan="5">Error loading users: ${error.message}</td></tr>`;
-        }
+        console.error('Error loading users:', error);
+        showErrorMessage('Failed to load users: ' + error.message);
     }
 }
 
-// Display users from auth data
-function displayUsersFromAuth(authUsers) {
-    console.log('Displaying auth users:', authUsers);
+// Render users table
+function renderUsersTable(users) {
     const tableBody = document.getElementById('users-table-body');
-    
-    if (!tableBody) {
-        console.error('users-table-body element not found in displayUsersFromAuth!');
-        return;
-    }
-    
-    if (!authUsers || authUsers.length === 0) {
-        tableBody.innerHTML = '<tr class="loading-row"><td colspan="5">No users found</td></tr>';
-        return;
-    }
-    
-    let html = '';
-    
-    authUsers.forEach(user => {
-        try {
-            console.log('Processing auth user:', user);
-            const fullName = `${user.user_metadata?.first_name || ''} ${user.user_metadata?.last_name || ''}`.trim() || 'Unnamed User';
-            const email = user.email || `ID: ${user.id.substring(0, 8)}...`;
-            const subscription = 'free'; // Default for auth users
-            const status = 'active';
-            
-            html += `
-                <tr data-id="${user.id}">
-                    <td>${fullName}</td>
-                    <td>${email}</td>
-                    <td>${subscription.charAt(0).toUpperCase() + subscription.slice(1)}</td>
-                    <td>
-                        <span class="status-badge status-${status.toLowerCase()}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
-                    </td>
-                    <td>
-                        <button type="button" class="action-btn" onclick="editUser('${user.id}')" title="Edit User">
-                            Edit
-                        </button>
-                        <button type="button" class="action-btn delete-btn" onclick="deleteUser('${user.id}')" title="Delete User">
-                            Delete
-                        </button>
-                    </td>
-                </tr>
-            `;
-        } catch (err) {
-            console.error('Error processing auth user:', err);
-        }
-    });
-    
-    tableBody.innerHTML = html;
-    console.log('Auth users table updated with', authUsers.length, 'users');
-}
-
-// Display users in table
-function displayUsers(users) {
-    console.log('Displaying users:', users);
-    const tableBody = document.getElementById('users-table-body');
-    
-    if (!tableBody) {
-        console.error('users-table-body element not found in displayUsers!');
-        return;
-    }
+    if (!tableBody) return;
     
     if (!users || users.length === 0) {
-        tableBody.innerHTML = '<tr class="loading-row"><td colspan="5">No users found</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="5">No users found</td></tr>';
         return;
     }
     
@@ -350,9 +103,7 @@ function displayUsers(users) {
     
     users.forEach(user => {
         try {
-            console.log('Processing user:', user);
             const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Unnamed User';
-            // Use user.email if available, otherwise use user ID
             const email = user.email || `ID: ${user.id.substring(0, 8)}...`;
             const subscription = user.subscription_tier || 'free';
             const status = user.subscription_status || 'active';
@@ -387,7 +138,7 @@ function displayUsers(users) {
 // Update pagination controls
 function updatePagination() {
     const prevBtn = document.getElementById('prev-page');
-    const nextBtn = document.getElementById('next-page');
+    const nextBtn = document.getElementById('prev-page');
     const pageInfo = document.getElementById('page-info');
     
     if (!pageInfo) return;
@@ -400,7 +151,8 @@ function updatePagination() {
     if (nextBtn) nextBtn.disabled = currentPage === totalPages;
 }
 
-
+// Load analytics data
+async function loadAnalytics() {
     try {
         // Use the allUsers array if available (from merged data)
         if (allUsers && allUsers.length > 0) {
@@ -423,7 +175,7 @@ function updatePagination() {
             const activeTodayEl = document.getElementById('active-today');
             
             if (totalUsersEl) totalUsersEl.textContent = totalCount;
-            if (premiumUsersEl) totalUsersEl.textContent = premiumCount;
+            if (premiumUsersEl) premiumUsersEl.textContent = premiumCount;
             if (newUsersEl) newUsersEl.textContent = newUsersCount;
             if (activeTodayEl) activeTodayEl.textContent = Math.floor(totalCount * 0.3); // Placeholder value
             
@@ -473,7 +225,7 @@ function updatePagination() {
     } catch (error) {
         console.error('Error loading analytics:', error.message);
     }
-
+    }
 
 // Load admin users
 async function loadAdminUsers() {
@@ -499,7 +251,6 @@ async function loadAdminUsers() {
         
         data.forEach(admin => {
             const fullName = `${admin.first_name || ''} ${admin.last_name || ''}`.trim() || 'Unnamed Admin';
-            // Use admin.email if available, otherwise use admin ID
             const email = admin.email || `User ID: ${admin.id.substring(0, 8)}...`;
             
             html += `
@@ -526,967 +277,691 @@ async function loadAdminUsers() {
     }
 }
 
-// Edit user
-function editUser(userId) {
-    console.log('Editing user with ID:', userId);
-    
-    // Find the user in allUsers
-    const user = allUsers.find(u => u.id === userId);
-    
-    if (!user) {
-        console.error('User not found in allUsers array');
-        alert('User not found');
-        return;
-    }
-    
-    console.log('Found user to edit:', user);
-    
-    // Open edit modal
-    const modal = document.getElementById('edit-user-modal');
-    if (!modal) {
-        console.error('Edit user modal not found in the DOM');
-        alert('Edit user modal not found');
-        return;
-    }
-    
-    // Check if we're using the old modal or new modal structure
-    const form = modal.querySelector('form');
-    if (!form) {
-        console.error('Form not found in modal');
-        return;
-    }
-    
-    console.log('Populating form fields');
-    
-    // Try to find the form fields
-    const firstNameInput = document.getElementById('edit-first-name');
-    const lastNameInput = document.getElementById('edit-last-name');
-    const subscriptionSelect = document.getElementById('edit-subscription');
-    const statusSelect = document.getElementById('edit-status');
-    const userIdInput = document.getElementById('edit-user-id');
-    
-    // Populate form fields if they exist
-    if (firstNameInput) firstNameInput.value = user.first_name || '';
-    if (lastNameInput) lastNameInput.value = user.last_name || '';
-    if (subscriptionSelect) subscriptionSelect.value = user.subscription_tier || 'free';
-    if (statusSelect) statusSelect.value = user.subscription_status || 'active';
-    if (userIdInput) userIdInput.value = user.id;
-    
-    // Show modal
-    modal.style.display = 'block';
-    console.log('Modal displayed');
-}
-
-// Save user changes
-async function saveUserChanges(form) {
+// Load keys from Key table
+async function loadKeys() {
     try {
-        const userId = form.querySelector('#edit-user-id').value;
-        const firstName = form.querySelector('#edit-first-name').value;
-        const lastName = form.querySelector('#edit-last-name').value;
-        const subscription = form.querySelector('#edit-subscription').value;
-        const status = form.querySelector('#edit-status').value;
+        console.log('Loading keys...');
+        const keysTableBody = document.getElementById('keys-table-body');
+        if (!keysTableBody) {
+            console.error('Keys table body not found');
+            return;
+        }
         
-        // Update user in database
-        const { data, error } = await supabase
-            .from('profiles')
-            .update({
-                first_name: firstName,
-                last_name: lastName,
-                subscription_tier: subscription,
-                subscription_status: status,
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', userId);
+        // Show loading state
+        keysTableBody.innerHTML = '<tr class="loading-row"><td colspan="5">Loading keys...</td></tr>';
+        
+        // Fetch keys with cache busting
+        const { data: keys, error } = await supabase
+            .from('Key')
+            .select('*')
+            .order('created_at', { ascending: false });
         
         if (error) throw error;
         
-        // Close modal
-        const modal = document.getElementById('edit-user-modal');
-        if (modal) modal.style.display = 'none';
+        console.log('Fetched keys from database:', keys);
         
-        // Reload users
-        await loadUsers();
+        if (!keys || keys.length === 0) {
+            keysTableBody.innerHTML = '<tr><td colspan="5">No keys found</td></tr>';
+            console.log('No keys found in database');
+            return;
+        }
         
-        alert('User updated successfully');
+        let html = '';
+        
+        keys.forEach(key => {
+            const status = key.used ? '🔴 Used' : '🟢 Available';
+            const statusClass = key.used ? 'status-used' : 'status-available';
+            
+            html += `
+                <tr data-id="${key.id}">
+                    <td>${key.id}</td>
+                    <td><code>${key.key_value}</code></td>
+                    <td><span class="status-badge ${statusClass}">${status}</span></td>
+                    <td>${new Date(key.created_at).toLocaleDateString()}</td>
+                    <td>
+                        <button type="button" class="action-btn" onclick="editKey('${key.id}')" title="Edit Key">
+                            Edit
+                        </button>
+                        <button type="button" class="action-btn delete-btn" onclick="deleteKey('${key.id}')" title="Delete Key">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        keysTableBody.innerHTML = html;
+        console.log('Keys table updated with', keys.length, 'keys');
         
     } catch (error) {
-        console.error('Error saving user changes:', error.message);
-        alert('Error saving user changes: ' + error.message);
+        console.error('Error loading keys:', error.message);
+        const keysTableBody = document.getElementById('keys-table-body');
+        if (keysTableBody) {
+            keysTableBody.innerHTML = `<tr class="loading-row"><td colspan="5">Error loading keys: ${error.message}</td></tr>`;
+        }
     }
 }
 
-// Delete user
-async function deleteUser(userId) {
-    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+// Add new key
+async function addKey() {
+    try {
+        const keyValue = document.getElementById('new-key-value').value.trim();
+        if (!keyValue) {
+            showErrorMessage('Please enter a key value');
+            return;
+        }
+        
+        if (keyValue.length !== 16) {
+            showErrorMessage('Key must be exactly 16 characters long');
         return;
     }
     
-    try {
-        // Delete user from profiles table
-        const { error: profileError } = await supabase
-            .from('profiles')
-            .delete()
-            .eq('id', userId);
+        console.log('Adding new key:', keyValue);
         
-        if (profileError) throw profileError;
+        const { error } = await supabase
+            .from('Key')
+            .insert({
+                key_value: keyValue,
+                used: false
+            });
         
-        // Note: To fully delete the user from auth.users would require admin API access
-        // which is not available from the client side for security reasons
+        if (error) throw error;
         
-        // Reload users
-        await loadUsers();
+        console.log('Key added successfully');
+        showSuccessMessage('Key added successfully');
         
-        alert('User deleted successfully');
+        // Clear input and reload keys
+        document.getElementById('new-key-value').value = '';
+        await loadKeys();
         
     } catch (error) {
-        console.error('Error deleting user:', error.message);
-        alert('Error deleting user: ' + error.message);
+        console.error('Error adding key:', error);
+        showErrorMessage('Failed to add key: ' + error.message);
     }
 }
 
-// Add admin user
-async function addAdmin() {
-    const userIdInput = document.getElementById('admin-user-id');
-    if (!userIdInput) return;
-    
-    const userId = userIdInput.value.trim();
-    
-    if (!userId) {
-        alert('Please enter a valid user ID');
-        return;
-    }
-    
+// Edit key
+async function editKey(keyId) {
     try {
-        // Check if user exists
-        const { data, error } = await supabase
-            .from('profiles')
+        console.log('Editing key:', keyId);
+        
+        // Get current key data
+        const { data: keys, error } = await supabase
+            .from('Key')
             .select('*')
-            .eq('id', userId)
+            .eq('id', keyId)
             .single();
         
         if (error) throw error;
         
-        if (!data) {
-            alert('User not found');
-            return;
-        }
-        
-        // Update user to admin
-        const { error: updateError } = await supabase
-            .from('profiles')
-            .update({ is_admin: true })
-            .eq('id', userId);
-        
-        if (updateError) throw updateError;
-        
-        // Clear input
-        userIdInput.value = '';
-        
-        // Reload admin users
-        await loadAdminUsers();
-        
-        alert('Admin user added successfully');
+        // Show edit modal
+        showEditKeyModal(keys);
         
     } catch (error) {
-        console.error('Error adding admin user:', error.message);
-        alert('Error adding admin user: ' + error.message);
+        console.error('Error editing key:', error);
+        showErrorMessage('Failed to edit key: ' + error.message);
     }
 }
 
-// Remove admin privileges
-async function removeAdmin(userId) {
-    if (!confirm('Are you sure you want to remove admin privileges from this user?')) {
+// Update key
+async function updateKey(keyId, keyValue, used) {
+    try {
+        console.log('Updating key:', keyId, keyValue, used);
+        
+        const { error } = await supabase
+            .from('Key')
+            .update({
+                key_value: keyValue,
+                used: used,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', keyId);
+        
+        if (error) throw error;
+        
+        console.log('Key updated successfully');
+        showSuccessMessage('Key updated successfully');
+        
+        // Close the modal
+        const modal = document.querySelector('.modal-overlay');
+        if (modal) {
+            modal.remove();
+        }
+        
+        // Reload keys
+        await loadKeys();
+        
+    } catch (error) {
+        console.error('Error updating key:', error);
+        showErrorMessage('Failed to update key: ' + error.message);
+    }
+}
+
+// Delete key
+async function deleteKey(keyId) {
+    try {
+        if (!confirm('Are you sure you want to delete this key? This action cannot be undone.')) {
+            return;
+        }
+        
+        console.log('Deleting key:', keyId);
+        
+        // First verify the key exists
+        const { data: keyExists, error: checkError } = await supabase
+            .from('Key')
+            .select('id')
+            .eq('id', keyId)
+            .single();
+        
+        if (checkError || !keyExists) {
+            showErrorMessage('Key not found or already deleted');
+            await loadKeys(); // Refresh to show current state
+            return;
+        }
+        
+        // Delete the key with multiple attempts
+        console.log('Attempting to delete key with ID:', keyId);
+        
+        // Method 1: Standard delete
+        let { data: deleteResult, error: deleteError } = await supabase
+            .from('Key')
+            .delete()
+            .eq('id', keyId)
+            .select();
+        
+        console.log('Delete result:', deleteResult);
+        
+        // If no rows deleted, try alternative method
+        if (!deleteResult || deleteResult.length === 0) {
+            console.log('Standard delete failed, trying alternative method...');
+            
+            // Method 2: Try with different approach
+            const { error: altDeleteError } = await supabase
+                .rpc('delete_key_by_id', { key_id: keyId });
+            
+            if (altDeleteError) {
+                console.log('Alternative delete also failed:', altDeleteError);
+                throw new Error('Failed to delete key - no rows affected');
+            } else {
+                console.log('Alternative delete successful');
+            }
+        }
+        
+        console.log('Key deleted successfully');
+        showSuccessMessage('Key deleted successfully');
+        
+        // Verify deletion by checking if key still exists
+        const { data: verifyKey, error: verifyError } = await supabase
+            .from('Key')
+            .select('id')
+            .eq('id', keyId)
+            .single();
+        
+        if (verifyError && verifyError.code === 'PGRST116') {
+            console.log('Key successfully verified as deleted (not found)');
+        } else if (verifyKey) {
+            console.log('WARNING: Key still exists after deletion:', verifyKey);
+        }
+        
+        // Force refresh the keys table
+        console.log('Refreshing keys table...');
+        await loadKeys();
+        
+        // Also remove the row from DOM if it exists
+        const row = document.querySelector(`tr[data-id="${keyId}"]`);
+        if (row) {
+            row.remove();
+            console.log('Row removed from DOM');
+        } else {
+            console.log('Row not found in DOM, table should be refreshed');
+        }
+        
+        // Double-check the count after refresh
+        const { count: finalCount, error: countError } = await supabase
+            .from('Key')
+            .select('*', { count: 'exact', head: true });
+        
+        if (countError) {
+            console.error('Error getting final count:', countError);
+        } else {
+            console.log('Final key count after deletion:', finalCount);
+        }
+        
+    } catch (error) {
+        console.error('Error deleting key:', error);
+        showErrorMessage('Failed to delete key: ' + error.message);
+        // Refresh table even on error to show current state
+        await loadKeys();
+    }
+}
+
+// Generate random key
+function generateRandomKey() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 16; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    document.getElementById('new-key-value').value = result;
+}
+
+// Show edit key modal
+function showEditKeyModal(key) {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h3>Edit Key</h3>
+            <div class="form-group">
+                <label>Key Value:</label>
+                <input type="text" id="edit-key-value" value="${key.key_value}" maxlength="16" />
+            </div>
+            <div class="form-group">
+                <label>Status:</label>
+                <select id="edit-key-used">
+                    <option value="false" ${!key.used ? 'selected' : ''}>Available</option>
+                    <option value="true" ${key.used ? 'selected' : ''}>Used</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button onclick="updateKey('${key.id}', document.getElementById('edit-key-value').value, document.getElementById('edit-key-used').value === 'true')">
+                    Update
+                </button>
+                <button onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+            // Close modal when clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+    
+    // Show add key modal
+    function showAddKeyModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>Add New Key</h3>
+                <div class="form-group">
+                    <label>Key Value:</label>
+                    <input type="text" id="add-key-value" placeholder="Enter 16-character key" maxlength="16" />
+                </div>
+                <div class="form-group">
+                    <label>Status:</label>
+                    <select id="add-key-used">
+                        <option value="false" selected>Available</option>
+                        <option value="true">Used</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button onclick="addNewKey()">Add Key</button>
+                    <button onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Close modal when clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+        
+        // Focus on input field
+        setTimeout(() => {
+            const input = document.getElementById('add-key-value');
+            if (input) input.focus();
+        }, 100);
+    }
+    
+    // Add new key function
+    async function addNewKey() {
+        try {
+            const keyValue = document.getElementById('add-key-value').value.trim();
+            const used = document.getElementById('add-key-used').value === 'true';
+            
+            if (!keyValue) {
+                showErrorMessage('Please enter a key value');
+                return;
+            }
+            
+            if (keyValue.length !== 16) {
+                showErrorMessage('Key must be exactly 16 characters long');
+                return;
+            }
+            
+            console.log('Adding new key:', keyValue, 'Used:', used);
+            
+            // Use the RLS-bypass function for admin users
+            const { data: newKeyId, error } = await supabase
+                .rpc('add_key_by_admin', {
+                    key_value: keyValue,
+                    is_used: used
+                });
+            
+            if (error) throw error;
+            
+            console.log('Key added successfully');
+            showSuccessMessage('Key added successfully');
+            
+            // Close the modal
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) {
+                modal.remove();
+            }
+            
+            // Reload keys
+            await loadKeys();
+            
+        } catch (error) {
+            console.error('Error adding key:', error);
+            showErrorMessage('Failed to add key: ' + error.message);
+        }
+    }
+
+// Delete user function
+async function deleteUser(userId) {
+    try {
+    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
         return;
     }
     
-    try {
-        // Update user to remove admin status
+        console.log('Deleting user:', userId);
+        
+        // Delete user from profiles table
         const { error } = await supabase
             .from('profiles')
+            .delete()
+            .eq('id', userId);
+        
+        if (error) throw error;
+        
+        console.log('User deleted successfully');
+        showSuccessMessage('User deleted successfully');
+        
+        // Reload users
+        await loadUsers(currentPage);
+        
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        showErrorMessage('Failed to delete user: ' + error.message);
+    }
+}
+
+// Edit user function
+async function editUser(userId) {
+    try {
+        console.log('Editing user:', userId);
+        
+        // Find user data
+        const user = allUsers.find(u => u.id === userId);
+        if (!user) {
+            showErrorMessage('User not found');
+            return;
+        }
+        
+        // Show edit modal (implement this based on your UI)
+        showEditUserModal(user);
+        
+    } catch (error) {
+        console.error('Error editing user:', error);
+        showErrorMessage('Failed to edit user: ' + error.message);
+    }
+}
+
+// Remove admin function
+async function removeAdmin(userId) {
+    try {
+    if (!confirm('Are you sure you want to remove admin privileges from this user?')) {
+            return;
+        }
+        
+        console.log('Removing admin privileges from user:', userId);
+        
+        const { error } = await supabase
+                .from('profiles')
             .update({ is_admin: false })
             .eq('id', userId);
         
         if (error) throw error;
         
+        console.log('Admin privileges removed successfully');
+        showSuccessMessage('Admin privileges removed successfully');
+        
         // Reload admin users
         await loadAdminUsers();
         
-        alert('Admin privileges removed successfully');
-        
     } catch (error) {
-        console.error('Error removing admin privileges:', error.message);
-        alert('Error removing admin privileges: ' + error.message);
+        console.error('Error removing admin privileges:', error);
+        showErrorMessage('Failed to remove admin privileges: ' + error.message);
     }
 }
 
-// Tab navigation
-function openTab(tabId) {
-    // Hide all tab content
-    const tabContents = document.querySelectorAll('.tab-content');
-    tabContents.forEach(tab => {
-        tab.classList.remove('active');
-    });
-    
-    // Deactivate all tab buttons
-    const tabButtons = document.querySelectorAll('.tab-button');
-    tabButtons.forEach(button => {
-        button.classList.remove('active');
-    });
-    
-    // Show the selected tab content
-    const selectedTab = document.getElementById(tabId);
-    if (selectedTab) {
-        selectedTab.classList.add('active');
-    }
-    
-    // Activate the clicked tab button
-    const clickedButton = document.querySelector(`.tab-button[onclick="openTab('${tabId}')"]`);
-    if (clickedButton) {
-        clickedButton.classList.add('active');
+// Utility functions
+function showSuccessMessage(message) {
+    // Implement success message display
+    console.log('Success:', message);
+    alert('Success: ' + message);
+}
+
+function showErrorMessage(message) {
+    // Implement error message display
+    console.error('Error:', message);
+    alert('Error: ' + message);
+}
+
+function showAccessDenied() {
+    const container = document.querySelector('.admin-container');
+    if (container) {
+        container.innerHTML = `
+            <div class="access-denied">
+                <h2>Access Denied</h2>
+                <p>You do not have permission to access the admin dashboard.</p>
+                <a href="/" class="btn">Go Home</a>
+            </div>
+        `;
     }
 }
 
-// Close modal
-function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.style.display = 'none';
+function showEditUserModal(user) {
+    // Implement edit user modal
+    console.log('Show edit modal for user:', user);
+    alert('Edit user: ' + user.first_name + ' ' + user.last_name);
+}
+
+// Navigation functions
+function goToPage(page) {
+    if (page >= 1 && page <= Math.ceil(totalUsers / usersPerPage)) {
+        loadUsers(page);
     }
 }
 
-// Make functions available globally
-window.editUser = editUser;
-window.deleteUser = deleteUser;
-window.saveUserChanges = saveUserChanges;
-window.addAdmin = addAdmin;
-window.removeAdmin = removeAdmin;
-window.openTab = openTab;
-window.closeModal = closeModal;
-
-// Enhanced user search functionality
-function searchUsers(searchTerm) {
-    if (!allUsers || allUsers.length === 0) {
-        console.log('No users to search');
-        return;
+function nextPage() {
+    if (currentPage < Math.ceil(totalUsers / usersPerPage)) {
+        goToPage(currentPage + 1);
     }
-    
-    const filteredUsers = allUsers.filter(user => {
-        const searchLower = searchTerm.toLowerCase();
-        const fullName = `${user.first_name || ''} ${user.last_name || ''}`.toLowerCase();
-        const email = (user.email || '').toLowerCase();
-        const subscription = (user.subscription_tier || '').toLowerCase();
-        
-        return fullName.includes(searchLower) || 
-               email.includes(searchLower) || 
-               subscription.includes(searchLower);
-    });
-    
-    console.log(`Search results: ${filteredUsers.length} users found for "${searchTerm}"`);
-    displayUsers(filteredUsers);
 }
 
-// Add search event listener
+function prevPage() {
+    if (currentPage > 1) {
+        goToPage(currentPage - 1);
+    }
+}
+
+// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('user-search');
-    if (searchInput) {
-        searchInput.addEventListener('input', function(e) {
-            const searchTerm = e.target.value.trim();
-            if (searchTerm === '') {
-                displayUsers(allUsers);
-            } else {
-                searchUsers(searchTerm);
-            }
-        });
-    }
+    console.log('Admin dashboard DOM loaded');
+    
+    // Add CSS for keys tab
+    addKeysTabStyles();
+    
+    initializeAdminDashboard();
 });
 
-// Refresh user data manually
+// Add CSS styles for keys tab
+function addKeysTabStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+        .status-available {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .status-used {
+            background: #ffebee;
+            color: #c62828;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            min-width: 300px;
+        }
+        
+        .form-group {
+            margin: 15px 0;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        
+        .modal-actions button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .modal-actions button:first-child {
+            background: #007bff;
+            color: white;
+        }
+        
+        .modal-actions button:last-child {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .add-key-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .add-key-section input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+            width: 200px;
+        }
+        
+        .add-key-section button {
+            margin-right: 10px;
+        }
+        
+        .key-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .key-stat {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .key-stat h3 {
+            margin: 0;
+            color: #007bff;
+        }
+        
+        .key-stat p {
+            margin: 5px 0 0 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Refresh user data function
 async function refreshUserData() {
     try {
-        console.log('Manually refreshing user data...');
-        
-        // Show loading state
-        const tableBody = document.getElementById('users-table-body');
-        if (tableBody) {
-            tableBody.innerHTML = '<tr class="loading-row"><td colspan="5">Refreshing users...</td></tr>';
-        }
-        
-        // Reload users
-        await loadUsers();
-        
-
-        
-        // Reload admin users
-        await loadAdminUsers();
-        
+        console.log('Refreshing user data...');
+        await loadUsers(currentPage);
+        await loadAnalytics();
         console.log('User data refreshed successfully');
-        
     } catch (error) {
-        console.error('Error refreshing user data:', error.message);
-        alert('Error refreshing user data: ' + error.message);
+        console.error('Error refreshing user data:', error);
+        showErrorMessage('Failed to refresh user data: ' + error.message);
     }
 }
 
-// Make refresh function available globally
+// Export functions for global access
+window.deleteUser = deleteUser;
+window.editUser = editUser;
+window.removeAdmin = removeAdmin;
+window.goToPage = goToPage;
+window.nextPage = nextPage;
+window.prevPage = prevPage;
 window.refreshUserData = refreshUserData;
-
-// Debug function to check database state
-async function debugDatabaseState() {
-    try {
-        console.log('=== DATABASE DEBUG START ===');
-        
-        // Check Supabase connection
-        console.log('Supabase client:', !!supabase);
-        if (supabase) {
-            console.log('Supabase URL:', supabase.supabaseUrl);
-        }
-        
-        // Check profiles table
-        console.log('Checking profiles table...');
-        const { data: profiles, error: profilesError } = await supabase
-            .from('profiles')
-            .select('*');
-        
-        if (profilesError) {
-            console.error('Profiles table error:', profilesError);
-        } else {
-            console.log('Profiles table data:', profiles);
-            console.log('Profiles count:', profiles?.length || 0);
-        }
-        
-        // Check if we can access auth
-        console.log('Checking auth access...');
-        try {
-            const { data: { user }, error: authError } = await supabase.auth.getUser();
-            if (authError) {
-                console.error('Auth error:', authError);
-            } else {
-                console.log('Current user:', user);
-            }
-        } catch (authError) {
-            console.error('Auth check failed:', authError);
-        }
-        
-        console.log('=== DATABASE DEBUG END ===');
-        
-    } catch (error) {
-        console.error('Debug function error:', error);
-    }
-}
-
-// Make debug function available globally
-window.debugDatabaseState = debugDatabaseState;
-
-// Function to create test users if none exist
-async function createTestUsersIfNeeded() {
-    try {
-        console.log('=== CREATING TEST USERS ===');
-        
-        // Check current profiles count
-        const { data: existingProfiles, error: countError } = await supabase
-            .from('profiles')
-            .select('*');
-        
-        if (countError) {
-            console.error('Error checking existing profiles:', countError);
-            return;
-        }
-        
-        console.log('Existing profiles count:', existingProfiles?.length || 0);
-        
-        if (existingProfiles && existingProfiles.length >= 3) {
-            console.log('Already have 3+ users, no need to create test users');
-            return;
-        }
-        
-        console.log('Need more users, creating test users...');
-        
-        // Create additional users to reach 3 total
-        const usersToCreate = 3 - (existingProfiles?.length || 0);
-        console.log(`Creating ${usersToCreate} additional users...`);
-        
-        // Create test users with unique IDs
-        const testUsers = [
-            {
-                id: 'test-user-' + Date.now() + '-1',
-                email: 'test1@example.com',
-                first_name: 'Test',
-                last_name: 'User 1',
-                subscription_tier: 'free',
-                subscription_status: 'active',
-                is_admin: false,
-                created_at: new Date().toISOString()
-            },
-            {
-                id: 'test-user-' + Date.now() + '-2',
-                email: 'test2@example.com',
-                first_name: 'Test',
-                last_name: 'User 2',
-                subscription_tier: 'pro',
-                subscription_status: 'active',
-                is_admin: false,
-                created_at: new Date().toISOString()
-            }
-        ];
-        
-        let createdCount = 0;
-        for (let i = 0; i < usersToCreate; i++) {
-            const testUser = testUsers[i];
-            console.log('Attempting to create user:', testUser.email);
-            
-            const { data, error: insertError } = await supabase
-                .from('profiles')
-                .insert(testUser)
-                .select();
-            
-            if (insertError) {
-                console.error('Error creating test user:', insertError);
-                console.error('Error details:', insertError.message);
-            } else {
-                console.log('✅ Test user created successfully:', testUser.email);
-                console.log('Created user data:', data);
-                createdCount++;
-            }
-        }
-        
-        console.log(`=== TEST USERS CREATION COMPLETED ===`);
-        console.log(`Users created: ${createdCount}`);
-        
-        // Reload users after creating new ones
-        if (createdCount > 0) {
-            console.log('🔄 Reloading users...');
-            await loadUsers();
-        }
-        
-    } catch (error) {
-        console.error('❌ Error creating test users:', error);
-        console.error('Error stack:', error.stack);
-    }
-}
-
-// Make test user creation function available globally
-window.createTestUsersIfNeeded = createTestUsersIfNeeded;
-
-// Function to sync auth users with profiles
-async function syncAuthUsersWithProfiles() {
-    try {
-        console.log('Syncing auth users with profiles...');
-        
-        // Get current user to check if we can access auth
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        
-        if (userError) {
-            console.error('Cannot get current user:', userError);
-            return;
-        }
-        
-        console.log('Current user:', user.email);
-        
-        // Try to get all profiles
-        const { data: profiles, error: profilesError } = await supabase
-            .from('profiles')
-            .select('*');
-        
-        if (profilesError) {
-            console.error('Error fetching profiles:', profilesError);
-            return;
-        }
-        
-        console.log('Current profiles:', profiles?.length || 0);
-        
-        // Check if we need to create more users
-        if (profiles && profiles.length < 3) {
-            console.log('Need more users. Creating additional test users...');
-            await createTestUsersIfNeeded();
-        } else {
-            console.log('Already have sufficient users');
-        }
-        
-    } catch (error) {
-        console.error('Error syncing auth users:', error);
-    }
-}
-
-// Make sync function available globally
-window.syncAuthUsersWithProfiles = syncAuthUsersWithProfiles;
-
-// Simple function to create 2 more users and show all 3
-async function createTwoMoreUsers() {
-    try {
-        console.log('=== CREATING 2 MORE USERS ===');
-        
-        // Create 2 new users with unique IDs
-        const user1 = {
-            id: 'user-' + Date.now() + '-1',
-            email: 'john.doe@example.com',
-            first_name: 'John',
-            last_name: 'Doe',
-            subscription_tier: 'pro',
-            subscription_status: 'active',
-            is_admin: false,
-            created_at: new Date().toISOString()
-        };
-        
-        const user2 = {
-            id: 'user-' + Date.now() + '-2',
-            email: 'jane.smith@example.com',
-            first_name: 'Jane',
-            last_name: 'Smith',
-            subscription_tier: 'business',
-            subscription_status: 'active',
-            is_admin: false,
-            created_at: new Date().toISOString()
-        };
-        
-        console.log('Creating user 1:', user1.email);
-        const { data: data1, error: error1 } = await supabase
-            .from('profiles')
-            .insert(user1)
-            .select();
-        
-        if (error1) {
-            console.error('❌ Error creating user 1:', error1);
-        } else {
-            console.log('✅ User 1 created:', data1);
-        }
-        
-        console.log('Creating user 2:', user2.email);
-        const { data: data2, error: error2 } = await supabase
-            .from('profiles')
-            .insert(user2)
-            .select();
-        
-        if (error2) {
-            console.error('❌ Error creating user 2:', error2);
-        } else {
-            console.log('✅ User 2 created:', data2);
-        }
-        
-        console.log('=== USERS CREATED ===');
-        
-        // Now reload users to show all 3
-        console.log('🔄 Reloading users...');
-        await loadUsers();
-        
-    } catch (error) {
-        console.error('❌ Error creating users:', error);
-    }
-}
-
-// Make create function available globally
-window.createTwoMoreUsers = createTwoMoreUsers;
-
-// Simple function to show what's in the database
-async function showDatabaseContents() {
-    try {
-        console.log('=== DATABASE CONTENTS ===');
-        
-        // Get all profiles
-        const { data: profiles, error: profilesError } = await supabase
-            .from('profiles')
-            .select('*');
-        
-        if (profilesError) {
-            console.error('❌ Error fetching profiles:', profilesError);
-            return;
-        }
-        
-        console.log('📊 Total profiles found:', profiles?.length || 0);
-        
-        if (profiles && profiles.length > 0) {
-            console.log('👥 Profile details:');
-            profiles.forEach((profile, index) => {
-                console.log(`  ${index + 1}. ${profile.first_name} ${profile.last_name} (${profile.email}) - ${profile.subscription_tier}`);
-            });
-        } else {
-            console.log('❌ No profiles found in database');
-        }
-        
-        console.log('=== END DATABASE CONTENTS ===');
-        
-    } catch (error) {
-        console.error('❌ Error showing database contents:', error);
-    }
-}
-
-// Make debug function available globally
-window.showDatabaseContents = showDatabaseContents;
-
-// Function to sync all auth users with profiles and show all users
-async function syncAllUsersAndShowThem() {
-    try {
-        console.log('=== SYNCING ALL USERS AND SHOWING THEM ===');
-        
-        // Step 1: Get current user to check auth access
-        const { data: { user: currentUser }, error: currentUserError } = await supabase.auth.getUser();
-        
-        if (currentUserError) {
-            console.error('Cannot get current user:', currentUserError);
-            return;
-        }
-        
-        console.log('Current user:', currentUser.email);
-        
-        // Step 2: Try to get all profiles
-        const { data: profiles, error: profilesError } = await supabase
-            .from('profiles')
-            .select('*');
-        
-        if (profilesError) {
-            console.error('Error fetching profiles:', profilesError);
-            return;
-        }
-        
-        console.log('Current profiles found:', profiles?.length || 0);
-        
-        // Step 3: Try to get all auth users (this might work for the current user's org)
-        let allAuthUsers = [];
-        try {
-            // Try to get users from auth.users via a different approach
-            console.log('Trying to get auth users via current user context...');
-            
-            // Since we can't use admin API, let's try to get users from the profiles table
-            // and also check if there are any users without profiles
-            
-            // First, let's see what we have in profiles
-            if (profiles && profiles.length > 0) {
-                console.log('Profiles data:', profiles);
-                
-                // Check if we need to create profiles for missing users
-                // Let's create some additional test users to reach 3 total
-                const currentCount = profiles.length;
-                const targetCount = 3;
-                const needToCreate = targetCount - currentCount;
-                
-                if (needToCreate > 0) {
-                    console.log(`Need to create ${needToCreate} more users to reach ${targetCount} total`);
-                    
-                    // Create the missing users
-                    for (let i = 1; i <= needToCreate; i++) {
-                        const newUser = {
-                            id: 'auto-user-' + Date.now() + '-' + i,
-                            email: `user${i}@example.com`,
-                            first_name: `User ${i}`,
-                            last_name: `Example`,
-                            subscription_tier: i === 1 ? 'pro' : 'business',
-                            subscription_status: 'active',
-                            is_admin: false,
-                            created_at: new Date().toISOString()
-                        };
-                        
-                        console.log(`Creating user ${i}:`, newUser.email);
-                        
-                        const { data: createdUser, error: createError } = await supabase
-                            .from('profiles')
-                            .insert(newUser)
-                            .select();
-                        
-                        if (createError) {
-                            console.error(`Error creating user ${i}:`, createError);
-                        } else {
-                            console.log(`✅ User ${i} created:`, createdUser);
-                        }
-                    }
-                }
-            }
-            
-        } catch (authError) {
-            console.warn('Auth users fetch failed:', authError.message);
-        }
-        
-        // Step 4: Reload users to show all of them
-        console.log('🔄 Reloading users to show all...');
-        await loadUsers();
-        
-        console.log('=== SYNC COMPLETED ===');
-        
-    } catch (error) {
-        console.error('❌ Error in sync:', error);
-    }
-}
-
-// Make force create function available globally
-window.forceCreateTwoUsers = forceCreateTwoUsers;
-
-// Function to sync all auth users to profiles table
-async function syncAllAuthUsersToProfiles() {
-    try {
-        console.log('=== SYNCING ALL AUTH USERS TO PROFILES ===');
-        
-        // First, let's check what users exist in profiles
-        console.log('Checking current profiles...');
-        
-        const { data: currentProfiles, error: profilesError } = await supabase
-            .from('profiles')
-            .select('*');
-        
-        if (profilesError) {
-            console.error('Error fetching current profiles:', profilesError);
-            return;
-        }
-        
-        console.log('Current profiles found:', currentProfiles?.length || 0);
-        
-        // If we have less than 4 users, let's create the missing ones
-        const targetUserCount = 4;
-        const currentUserCount = currentProfiles?.length || 0;
-        
-        if (currentUserCount < targetUserCount) {
-            console.log(`Need to create ${targetUserCount - currentUserCount} more users`);
-            
-            // Create additional users to reach 4 total
-            for (let i = currentUserCount + 1; i <= targetUserCount; i++) {
-                // Generate proper UUID for the id field
-                let uuid;
-                if (typeof generateUUID === 'function') {
-                    uuid = generateUUID();
-                } else {
-                    // Fallback UUID generation if generateUUID function is not available
-                    uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                        const r = Math.random() * 16 | 0;
-                        const v = c === 'x' ? r : (r & 0x3 | 0x8);
-                        return v.toString(16);
-                    });
-                }
-                
-                const newUser = {
-                    id: uuid,
-                    email: `user${i}@example.com`,
-                    first_name: `User ${i}`,
-                    last_name: 'Example',
-                    subscription_tier: i === 1 ? 'free' : i === 2 ? 'pro' : 'business',
-                    subscription_status: 'active',
-                    is_admin: false,
-                    created_at: new Date().toISOString()
-                };
-                
-                console.log(`Creating sync user ${i}:`, newUser.email, 'with UUID:', uuid);
-                
-                const { data: createdUser, error: createError } = await supabase
-                    .from('profiles')
-                    .insert(newUser)
-                    .select();
-                
-                if (createError) {
-                    console.error(`Error creating sync user ${i}:`, createError);
-                } else {
-                    console.log(`✅ Sync user ${i} created:`, createdUser);
-                }
-            }
-        }
-        
-        console.log('=== SYNC COMPLETED ===');
-        
-        // Now reload users to show all of them
-        console.log('🔄 Reloading users...');
-        await loadUsers();
-        
-    } catch (error) {
-        console.error('❌ Error syncing auth users:', error);
-    }
-}
-
-// Make sync function available globally
-window.syncAllAuthUsersToProfiles = syncAllAuthUsersToProfiles;
-
-// Alternative function to create users with proper data
-async function createMissingUsers() {
-    try {
-        console.log('=== CREATING MISSING USERS ===');
-        
-        // Check current profiles
-        const { data: currentProfiles, error: profilesError } = await supabase
-            .from('profiles')
-            .select('*');
-        
-        if (profilesError) {
-            console.error('Error fetching profiles:', profilesError);
-            return;
-        }
-        
-        console.log('Current profiles found:', currentProfiles?.length || 0);
-        
-        // Create 3 more users to reach 4 total
-        const usersToCreate = [
-            {
-                email: 'john.doe@example.com',
-                first_name: 'John',
-                last_name: 'Doe',
-                subscription_tier: 'pro',
-                subscription_status: 'active'
-            },
-            {
-                email: 'jane.smith@example.com',
-                first_name: 'Jane',
-                last_name: 'Smith',
-                subscription_tier: 'business',
-                subscription_status: 'active'
-            },
-            {
-                email: 'bob.wilson@example.com',
-                first_name: 'Bob',
-                last_name: 'Wilson',
-                subscription_tier: 'free',
-                subscription_status: 'active'
-            }
-        ];
-        
-        for (let i = 0; i < usersToCreate.length; i++) {
-            const userData = usersToCreate[i];
-            
-            // Generate UUID
-            const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                const r = Math.random() * 16 | 0;
-                const v = c === 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            });
-            
-            const newUser = {
-                id: uuid,
-                email: userData.email,
-                first_name: userData.first_name,
-                last_name: userData.last_name,
-                subscription_tier: userData.subscription_tier,
-                subscription_status: userData.subscription_status,
-                is_admin: false,
-                created_at: new Date().toISOString()
-            };
-            
-            console.log(`Creating user ${i + 1}:`, newUser.email);
-            
-            const { data: createdUser, error: createError } = await supabase
-                .from('profiles')
-                .insert(newUser)
-                .select();
-            
-            if (createError) {
-                console.error(`Error creating user ${i + 1}:`, createError);
-            } else {
-                console.log(`✅ User ${i + 1} created:`, createdUser);
-            }
-        }
-        
-        console.log('=== USERS CREATED ===');
-        
-        // Reload users
-        console.log('🔄 Reloading users...');
-        await loadUsers();
-        
-    } catch (error) {
-        console.error('❌ Error creating users:', error);
-    }
-}
-
-// Make create function available globally
-window.createMissingUsers = createMissingUsers;
-
-// Simple debug function to check database contents
-async function debugDatabaseContents() {
-    try {
-        console.log('=== DEBUGGING DATABASE CONTENTS ===');
-        
-        const { data: profiles, error: profilesError } = await supabase
-            .from('profiles')
-            .select('*');
-        
-        if (profilesError) {
-            console.error('Error fetching profiles:', profilesError);
-            return;
-        }
-        
-        console.log('Total profiles in database:', profiles?.length || 0);
-        
-        if (profiles && profiles.length > 0) {
-            console.log('Profile details:');
-            profiles.forEach((profile, index) => {
-                console.log(`${index + 1}. ID: ${profile.id}`);
-                console.log(`   Email: ${profile.email}`);
-                console.log(`   Name: ${profile.first_name} ${profile.last_name}`);
-                console.log(`   Admin: ${profile.is_admin}`);
-                console.log(`   Subscription: ${profile.subscription_tier}`);
-                console.log(`   Created: ${profile.created_at}`);
-                console.log('   ---');
-            });
-        } else {
-            console.log('No profiles found in database');
-        }
-        
-        console.log('=== END DEBUG ===');
-        
-    } catch (error) {
-        console.error('Error debugging database:', error);
-    }
-}
-
-// Make debug function available globally
-window.debugDatabaseContents = debugDatabaseContents;
-
-// Function to test RLS policies and database access
-async function testRLSAccess() {
-    try {
-        console.log('=== TESTING RLS ACCESS ===');
-        
-        // Test 1: Try to read all profiles
-        console.log('Test 1: Reading all profiles...');
-        const { data: profiles, error: profilesError } = await supabase
-            .from('profiles')
-            .select('*');
-        
-        if (profilesError) {
-            console.error('❌ Error reading profiles:', profilesError);
-            console.log('Error code:', profilesError.code);
-            console.log('Error message:', profilesError.message);
-        } else {
-            console.log('✅ Successfully read profiles:', profiles?.length || 0);
-            if (profiles && profiles.length > 0) {
-                console.log('First profile:', profiles[0]);
-            }
-        }
-        
-        // Test 2: Try to read specific profile by ID
-        console.log('Test 2: Reading specific profile...');
-        const { data: specificProfile, error: specificError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', 'ebbc71f9-17bd-4169-a830-727fc52adbfb')
-            .single();
-        
-        if (specificError) {
-            console.error('❌ Error reading specific profile:', specificError);
-        } else {
-            console.log('✅ Successfully read specific profile:', specificProfile);
-        }
-        
-        // Test 3: Try to read with different query
-        console.log('Test 3: Reading with limit...');
-        const { data: limitedProfiles, error: limitedError } = await supabase
-            .from('profiles')
-            .select('id, email, first_name')
-            .limit(10);
-        
-        if (limitedError) {
-            console.error('❌ Error reading limited profiles:', limitedError);
-        } else {
-            console.log('✅ Successfully read limited profiles:', limitedProfiles?.length || 0);
-        }
-        
-        // Test 4: Check current user
-        console.log('Test 4: Checking current user...');
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        
-        if (userError) {
-            console.error('❌ Error getting current user:', userError);
-        } else {
-            console.log('✅ Current user:', user?.id);
-            console.log('✅ Current user email:', user?.email);
-        }
-        
-        console.log('=== END RLS TEST ===');
-        
-    } catch (error) {
-        console.error('❌ Error testing RLS access:', error);
-    }
-}
-
-// Make RLS test function available globally
-window.testRLSAccess = testRLSAccess;
+window.loadKeys = loadKeys;
+window.addKey = addKey;
+window.editKey = editKey;
+window.updateKey = updateKey;
+window.deleteKey = deleteKey;
+window.generateRandomKey = generateRandomKey;
+window.showAddKeyModal = showAddKeyModal;
+window.addNewKey = addNewKey;

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Key Update</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 50px; }
+        .result { background: #f0f0f0; padding: 20px; margin: 20px 0; border-radius: 5px; }
+        button { padding: 10px 20px; margin: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+        .info { background: #e3f2fd; color: #1565c0; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Key Update Issue</h1>
+    <p>This will help us fix the "key not marked as used" problem.</p>
+    
+    <button onclick="testKeyUpdate()">🧪 Test Key Update</button>
+    <button onclick="checkKeyStatus()">🔍 Check Key Status</button>
+    <button onclick="clearResults()">🗑️ Clear Results</button>
+    
+    <div id="results"></div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        // Initialize Supabase (you'll need to add your credentials)
+        const supabaseUrl = 'https://hyimlsdqexkbltlhjctp.supabase.co';
+        const supabaseKey = 'YOUR_SUPABASE_ANON_KEY'; // Add your key here
+        
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        
+        function addResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `result ${type}`;
+            resultDiv.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
+            resultsDiv.appendChild(resultDiv);
+        }
+        
+        async function testKeyUpdate() {
+            try {
+                addResult('🧪 Starting key update test...', 'info');
+                
+                // Step 1: Get an unused key
+                addResult('Step 1: Getting unused key...', 'info');
+                const { data: keys, error: keyError } = await supabase
+                    .from('Key')
+                    .select('*')
+                    .eq('used', false)
+                    .limit(1)
+                    .single();
+                
+                if (keyError) {
+                    addResult(`❌ Step 1 failed: ${keyError.message}`, 'error');
+                    return;
+                }
+                
+                addResult(`✅ Step 1: Got key: ${JSON.stringify(keys, null, 2)}`, 'success');
+                
+                // Step 2: Try to mark it as used
+                addResult('Step 2: Marking key as used...', 'info');
+                
+                // Determine which column to use for the update
+                let updateColumn = 'id';
+                let updateValue = keys.id;
+                
+                if (keys.id !== undefined) {
+                    updateColumn = 'id';
+                    updateValue = keys.id;
+                } else if (keys.key_value !== undefined) {
+                    updateColumn = 'key_value';
+                    updateValue = keys.key_value;
+                }
+                
+                addResult(`Using column: ${updateColumn} = ${updateValue}`, 'info');
+                
+                // Try the update
+                const { data: updateData, error: updateError } = await supabase
+                    .from('Key')
+                    .update({ 
+                        used: true, 
+                        updated_at: new Date().toISOString() 
+                    })
+                    .eq(updateColumn, updateValue)
+                    .select(); // Return the updated data
+                
+                if (updateError) {
+                    addResult(`❌ Step 2 failed: ${updateError.message}`, 'error');
+                    addResult(`Error code: ${updateError.code}`, 'error');
+                    addResult(`Error details: ${JSON.stringify(updateError, null, 2)}`, 'error');
+                    return;
+                }
+                
+                addResult(`✅ Step 2: Key marked as used successfully!`, 'success');
+                addResult(`Updated record: ${JSON.stringify(updateData, null, 2)}`, 'info');
+                
+                // Step 3: Verify the update
+                addResult('Step 3: Verifying update...', 'info');
+                const { data: verifyData, error: verifyError } = await supabase
+                    .from('Key')
+                    .select('*')
+                    .eq(updateColumn, updateValue)
+                    .single();
+                
+                if (verifyError) {
+                    addResult(`❌ Step 3 failed: ${verifyError.message}`, 'error');
+                } else {
+                    addResult(`✅ Step 3: Verification successful!`, 'success');
+                    addResult(`Key is now used: ${verifyData.used}`, 'success');
+                    addResult(`Updated at: ${verifyData.updated_at}`, 'info');
+                }
+                
+                // Step 4: Reset key back to unused for testing
+                addResult('Step 4: Resetting key to unused...', 'info');
+                const { error: resetError } = await supabase
+                    .from('Key')
+                    .update({ 
+                        used: false, 
+                        updated_at: new Date().toISOString() 
+                    })
+                    .eq(updateColumn, updateValue);
+                
+                if (resetError) {
+                    addResult(`❌ Step 4 failed: ${resetError.message}`, 'error');
+                } else {
+                    addResult('✅ Step 4: Key reset to unused successfully', 'success');
+                }
+                
+                addResult('🎉 All tests completed!', 'success');
+                
+            } catch (error) {
+                addResult(`❌ Test failed: ${error.message}`, 'error');
+                addResult(`Stack trace: ${error.stack}`, 'error');
+            }
+        }
+        
+        async function checkKeyStatus() {
+            try {
+                addResult('🔍 Checking current key status...', 'info');
+                
+                const { data, error } = await supabase
+                    .from('Key')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+                
+                if (error) {
+                    addResult(`❌ Error: ${error.message}`, 'error');
+                    return;
+                }
+                
+                addResult(`✅ Found ${data.length} keys:`, 'success');
+                data.forEach((key, index) => {
+                    const status = key.used ? '🔴 USED' : '🟢 UNUSED';
+                    addResult(`${index + 1}. ${key.key_value} - ${status} (ID: ${key.id})`, 'info');
+                });
+                
+            } catch (error) {
+                addResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        // Auto-check on page load
+        window.addEventListener('load', () => {
+            addResult('Page loaded. Ready to debug key update issue.', 'info');
+            addResult('⚠️ Make sure to add your Supabase anon key in the script!', 'error');
+        });
+    </script>
+</body>
+</html>

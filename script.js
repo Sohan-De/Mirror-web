@@ -2078,15 +2078,42 @@ function createPlanCard(plan, index) {
     // Add popular badge if it's the second plan (usually professional)
     const popularBadge = index === 1 ? '<div class="popular-badge">Most Popular</div>' : '';
     
+    // Debug: Log plan data to see what we're working with
+    console.log(`🔍 Plan ${index}:`, {
+        name: plan.name,
+        features: plan.features,
+        featuresType: typeof plan.features,
+        isArray: Array.isArray(plan.features)
+    });
+    
     // Parse features from plan description or use default
-    const features = plan.features ? JSON.parse(plan.features) : getDefaultFeatures(plan.name);
+    let features;
+    if (plan.features) {
+        try {
+            // Try to parse as JSON first
+            features = JSON.parse(plan.features);
+            console.log(`✅ Successfully parsed JSON features for ${plan.name}:`, features);
+        } catch (e) {
+            console.log(`⚠️ JSON parsing failed for ${plan.name}, treating as text:`, e.message);
+            // If JSON parsing fails, treat as plain text
+            if (typeof plan.features === 'string') {
+                features = [plan.features]; // Convert single string to array
+            } else if (Array.isArray(plan.features)) {
+                features = plan.features; // Already an array
+            } else {
+                features = getDefaultFeatures(plan.name); // Fallback to defaults
+            }
+        }
+    } else {
+        console.log(`ℹ️ No features found for ${plan.name}, using defaults`);
+        features = getDefaultFeatures(plan.name);
+    }
     
     card.innerHTML = `
         ${popularBadge}
         <div class="card-header">
             <div class="plan-icon">${getPlanIcon(plan.name)}</div>
             <h3 class="plan-name">${plan.name || 'Plan'}</h3>
-            <div class="plan-badge">${plan.duration || 'Custom'}</div>
         </div>
         <div class="plan-price">
             <span class="currency">$</span>

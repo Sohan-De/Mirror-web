@@ -1,5 +1,10 @@
 // Checkout Page JavaScript with Stripe Integration
 
+// Load EmailJS for key delivery
+const emailjsScript = document.createElement('script');
+emailjsScript.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
+document.head.appendChild(emailjsScript);
+
 // Stripe configuration
 const stripe = Stripe('pk_test_51QH7ScFv00fKIACqGfORYO5j1VPJRwZgxxY2P1662qAIwfbm1vv3nfJi4Ig4UUrCoPDoMuslLPGRUja9NQZl6ecq003TypD8pF');
 
@@ -852,7 +857,9 @@ async function processCryptoPayment() {
         
         // Update user subscription
         await updateUserSubscription(paymentResult);
-        showSuccess();
+        
+        // Show success and deliver key
+        await showSuccess();
         
     } catch (error) {
         console.error('Crypto payment failed:', error);
@@ -907,11 +914,66 @@ function refreshCryptoPrices() {
     });
 }
 
-// Show success modal
-function showSuccess() {
-    const modal = document.getElementById('success-modal');
-    if (modal) {
-        modal.style.display = 'flex';
+// Show success modal and deliver key
+async function showSuccess() {
+    try {
+        // Get user information from form
+        const userEmail = document.getElementById('email').value;
+        const userName = document.getElementById('name').value;
+        const packageName = currentPackage ? currentPackage.name : 'Unknown Package';
+        
+        console.log('Payment successful! Delivering key to:', userEmail);
+        console.log('User name:', userName);
+        console.log('Package:', packageName);
+        
+        // Initialize key delivery service
+        if (typeof KeyDeliveryService !== 'undefined') {
+            const keyDeliveryService = new KeyDeliveryService();
+            
+            // Process key delivery
+            const result = await keyDeliveryService.processSuccessfulPayment(
+                userEmail,
+                userName,
+                packageName
+            );
+            
+            if (result.success) {
+                console.log('✅ Key delivered successfully:', result.key);
+                // Update success message to include key delivery
+                const successMessage = document.querySelector('#success-modal p');
+                if (successMessage) {
+                    successMessage.textContent = `Your subscription is now active and your license key has been sent to ${userEmail}! Start sharing your screen with premium features!`;
+                }
+            } else {
+                console.error('❌ Key delivery failed:', result.error);
+                // Show warning but don't block success
+                const successMessage = document.querySelector('#success-modal p');
+                if (successMessage) {
+                    successMessage.textContent = `Your subscription is now active! Note: There was an issue sending your license key. Please contact support at support@mirrorweb.com`;
+                }
+            }
+        } else {
+            console.error('❌ KeyDeliveryService not loaded');
+            // Show warning but don't block success
+            const successMessage = document.querySelector('#success-modal p');
+            if (successMessage) {
+                successMessage.textContent = `Your subscription is now active! Note: There was an issue sending your license key. Please contact support at support@mirrorweb.com`;
+            }
+        }
+        
+        // Show success modal
+        const modal = document.getElementById('success-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+        
+    } catch (error) {
+        console.error('Error in showSuccess:', error);
+        // Show success modal even if key delivery fails
+        const modal = document.getElementById('success-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+        }
     }
 }
 
