@@ -22,39 +22,46 @@ class KeyDeliveryService {
         }
     }
 
-    // Get an unused key from the database
-    async getUnusedKey() {
+    // Get an unused key from the database for a specific plan
+    async getUnusedKey(planId = null) {
         try {
-            // First, let's check what columns exist in the Key table
-            console.log('Checking Key table structure...');
+            console.log('Getting unused key for plan:', planId);
             
-            // Try to get all columns to see the actual structure
-            const { data: allKeys, error: structureError } = await supabase
+            // Build the query
+            let query = supabase
                 .from('Key')
                 .select('*')
-                .limit(1);
+                .eq('used', false);
             
-            if (structureError) {
-                console.error('Error checking table structure:', structureError);
-                throw structureError;
+            // If planId is provided, filter by plan_id
+            if (planId) {
+                query = query.eq('plan_id', planId);
+                console.log(`🔍 Filtering keys for plan_id: ${planId}`);
             }
             
-            if (allKeys && allKeys.length > 0) {
-                console.log('Key table structure:', Object.keys(allKeys[0]));
-            }
-            
-            // Now try to get an unused key with the correct column names
-            // Based on your table structure, it might be 'key_id' instead of 'id'
-            const { data, error } = await supabase
-                .from('Key')
-                .select('*')  // Select all columns to be safe
-                .eq('used', false)
-                .limit(1)
-                .single();
+            // Get the first available key
+            const { data, error } = await query.limit(1).single();
 
-            if (error) throw error;
+            if (error) {
+                if (error.code === 'PGRST116') {
+                    // No keys found for this plan
+                    console.log(`❌ No unused keys available for plan_id: ${planId}`);
+                    return null;
+                }
+                throw error;
+            }
             
-            console.log('Found unused key:', data);
+            // Verify the key has the correct plan_id
+            if (planId && data.plan_id !== planId) {
+                console.error(`❌ CRITICAL ERROR: Key returned has wrong plan_id!`);
+                console.error(`Expected plan_id: ${planId}, Got: ${data.plan_id}`);
+                console.error(`Key data:`, data);
+                throw new Error(`Database returned key with wrong plan_id. Expected: ${planId}, Got: ${data.plan_id}`);
+            }
+            
+            console.log('✅ Found unused key:', data);
+            console.log(`🔑 Key value: ${data.key_value}, Plan ID: ${data.plan_id}`);
+            console.log(`✅ Plan ID verification passed: ${data.plan_id} === ${planId}`);
             return data;
         } catch (error) {
             console.error('Error getting unused key:', error);
@@ -193,20 +200,25 @@ class KeyDeliveryService {
     }
 
     // Main function: Process successful payment and send key
-    async processSuccessfulPayment(userEmail, userName, packageName) {
+    async processSuccessfulPayment(userEmail, userName, packageName, planId = null) {
         try {
-            console.log('Processing successful payment for:', userEmail);
+            console.log('Processing successful payment for:', userEmail, 'Plan:', packageName, 'Plan ID:', planId);
 
-            // Step 1: Get an unused key
-            console.log('🔍 Step 1: Getting unused key...');
-            const keyData = await this.getUnusedKey();
+            // Step 1: Get an unused key for the specific plan
+            console.log('🔍 Step 1: Getting unused key for plan...');
+            const keyData = await this.getUnusedKey(planId);
             if (!keyData) {
-                throw new Error('No unused keys available');
+                if (planId) {
+                    throw new Error(`No unused keys available for ${packageName} plan. Please contact support.`);
+                } else {
+                    throw new Error('No unused keys available. Please contact support.');
+                }
             }
             
             console.log('✅ Step 1: Got unused key:', keyData);
             console.log('🔑 Key value:', keyData.key_value);
-            console.log('📊 Available columns:', Object.keys(keyData));
+            console.log('📊 Plan ID:', keyData.plan_id);
+            console.log('📦 Package:', packageName);
 
             // Step 2: Send the key via email
             const emailSent = await this.sendKeyEmail(
@@ -227,17 +239,18 @@ class KeyDeliveryService {
             }
 
             // Step 4: Log the transaction
-            await this.logKeyDelivery(userEmail, keyData.key_value, packageName);
+            await this.logKeyDelivery(userEmail, keyData.key_value, packageName, planId);
 
-            console.log('Key delivery completed successfully');
+            console.log('✅ Key delivery completed successfully');
             return {
                 success: true,
                 key: keyData.key_value,
+                plan_id: keyData.plan_id,
                 message: 'Key delivered successfully'
             };
 
         } catch (error) {
-            console.error('Error processing successful payment:', error);
+            console.error('❌ Error processing successful payment:', error);
             return {
                 success: false,
                 error: error.message
@@ -246,7 +259,7 @@ class KeyDeliveryService {
     }
 
     // Log key delivery for tracking
-    async logKeyDelivery(userEmail, keyValue, packageName) {
+    async logKeyDelivery(userEmail, keyValue, packageName, planId = null) {
         try {
             const { error } = await supabase
                 .from('key_delivery_logs')
@@ -254,6 +267,7 @@ class KeyDeliveryService {
                     user_email: userEmail,
                     key_value: keyValue,
                     package_name: packageName,
+                    plan_id: planId,
                     delivered_at: new Date().toISOString(),
                     status: 'delivered'
                 });
@@ -281,6 +295,96 @@ class KeyDeliveryService {
         } catch (error) {
             console.error('Error getting delivery status:', error);
             return null;
+        }
+    }
+
+    // Helper function to get plan ID from package name
+    getPlanIdFromPackageName(packageName) {
+        const packageMap = {
+            'free': 1,
+            'Free': 1,
+            'pro': 2,
+            'Pro': 2,
+            'business': 3,
+            'Business': 3
+        };
+        
+        return packageMap[packageName] || null;
+    }
+
+    // Check if keys are available for a specific plan
+    async checkKeyAvailability(planId) {
+        try {
+            const { count, error } = await supabase
+                .from('Key')
+                .select('*', { count: 'exact', head: true })
+                .eq('used', false)
+                .eq('plan_id', planId);
+
+            if (error) throw error;
+            
+            console.log(`🔍 Available keys for plan ${planId}: ${count}`);
+            return count || 0;
+        } catch (error) {
+            console.error('Error checking key availability:', error);
+            return 0;
+        }
+    }
+
+    // Get plan details for a specific plan ID
+    async getPlanDetails(planId) {
+        try {
+            const { data, error } = await supabase
+                .from('subscription_packages')
+                .select('*')
+                .eq('id', planId)
+                .single();
+
+            if (error) throw error;
+            return data;
+        } catch (error) {
+            console.error('Error getting plan details:', error);
+            return null;
+        }
+    }
+
+    // Test function to verify key delivery system
+    async testKeyDelivery(planId) {
+        try {
+            console.log(`🧪 Testing key delivery for plan_id: ${planId}`);
+            
+            // Check key availability
+            const availableKeys = await this.checkKeyAvailability(planId);
+            console.log(`📊 Available keys for plan ${planId}: ${availableKeys}`);
+            
+            if (availableKeys === 0) {
+                console.log(`❌ No keys available for plan ${planId}`);
+                return false;
+            }
+            
+            // Get a key without marking it as used (for testing)
+            const { data, error } = await supabase
+                .from('Key')
+                .select('*')
+                .eq('used', false)
+                .eq('plan_id', planId)
+                .limit(1)
+                .single();
+            
+            if (error) {
+                console.error('❌ Error getting test key:', error);
+                return false;
+            }
+            
+            console.log(`✅ Test key found:`, data);
+            console.log(`🔑 Key value: ${data.key_value}`);
+            console.log(`📦 Plan ID: ${data.plan_id}`);
+            console.log(`✅ Plan ID matches: ${data.plan_id === planId}`);
+            
+            return true;
+        } catch (error) {
+            console.error('❌ Test failed:', error);
+            return false;
         }
     }
 }

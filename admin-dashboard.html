@@ -640,6 +640,59 @@
         .form-control:focus {
             outline: none;
             border-color: #00d4ff;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+        
+        /* Ensure select elements maintain background color */
+        select.form-control {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+        
+        select.form-control:focus {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+        
+        /* Style select options */
+        select.form-control option {
+            background: #16213e;
+            color: #fff;
+        }
+        
+        /* Ensure textarea elements maintain background color */
+        textarea.form-control {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            resize: vertical;
+        }
+        
+        textarea.form-control:focus {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+        
+        /* Ensure number input elements maintain background color */
+        input[type="number"].form-control {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+        
+        input[type="number"].form-control:focus {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+        
+        /* Remove number input spinners for cleaner look */
+        input[type="number"].form-control::-webkit-outer-spin-button,
+        input[type="number"].form-control::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        input[type="number"].form-control {
+            -moz-appearance: textfield;
         }
         
         /* Modal */
@@ -978,6 +1031,7 @@
                         <tr>
                             <th>ID</th>
                             <th>Key Value</th>
+                            <th>Plan</th>
                             <th>Status</th>
                             <th>Created</th>
                             <th>Actions</th>
@@ -985,7 +1039,7 @@
                     </thead>
                     <tbody id="keys-table-body">
                         <tr class="loading-row">
-                            <td colspan="5">Loading keys...</td>
+                            <td colspan="6">Loading keys...</td>
                         </tr>
                     </tbody>
                 </table>

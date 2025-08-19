@@ -930,12 +930,25 @@ async function showSuccess() {
         if (typeof KeyDeliveryService !== 'undefined') {
             const keyDeliveryService = new KeyDeliveryService();
             
-            // Process key delivery
-            const result = await keyDeliveryService.processSuccessfulPayment(
-                userEmail,
-                userName,
-                packageName
-            );
+                    // Get plan ID from package name
+        let planId = null;
+        if (packageName.toLowerCase() === 'free') {
+            planId = 1;
+        } else if (packageName.toLowerCase() === 'pro') {
+            planId = 2;
+        } else if (packageName.toLowerCase() === 'business') {
+            planId = 3;
+        }
+        
+        console.log('Package:', packageName, 'Plan ID:', planId);
+        
+        // Process key delivery with plan ID
+        const result = await keyDeliveryService.processSuccessfulPayment(
+            userEmail,
+            userName,
+            packageName,
+            planId
+        );
             
             if (result.success) {
                 console.log('✅ Key delivered successfully:', result.key);

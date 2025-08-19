@@ -288,7 +288,7 @@ async function loadKeys() {
         }
         
         // Show loading state
-        keysTableBody.innerHTML = '<tr class="loading-row"><td colspan="5">Loading keys...</td></tr>';
+        keysTableBody.innerHTML = '<tr class="loading-row"><td colspan="6">Loading keys...</td>';
         
         // Fetch keys with cache busting
         const { data: keys, error } = await supabase
@@ -301,7 +301,7 @@ async function loadKeys() {
         console.log('Fetched keys from database:', keys);
         
         if (!keys || keys.length === 0) {
-            keysTableBody.innerHTML = '<tr><td colspan="5">No keys found</td></tr>';
+            keysTableBody.innerHTML = '<tr><td colspan="6">No keys found</td></tr>';
             console.log('No keys found in database');
             return;
         }
@@ -312,10 +312,18 @@ async function loadKeys() {
             const status = key.used ? '🔴 Used' : '🟢 Available';
             const statusClass = key.used ? 'status-used' : 'status-available';
             
+            // Get plan name based on plan_id
+            let planName = 'Unknown';
+            if (key.plan_id === 1) planName = 'Free ($0.00)';
+            else if (key.plan_id === 2) planName = 'Pro ($29.99)';
+            else if (key.plan_id === 3) planName = 'Business ($99.99)';
+            else if (key.plan_id) planName = `Plan ${key.plan_id}`;
+            
             html += `
                 <tr data-id="${key.id}">
                     <td>${key.id}</td>
                     <td><code>${key.key_value}</code></td>
+                    <td>${planName}</td>
                     <td><span class="status-badge ${statusClass}">${status}</span></td>
                     <td>${new Date(key.created_at).toLocaleDateString()}</td>
                     <td>
@@ -337,7 +345,7 @@ async function loadKeys() {
         console.error('Error loading keys:', error.message);
         const keysTableBody = document.getElementById('keys-table-body');
         if (keysTableBody) {
-            keysTableBody.innerHTML = `<tr class="loading-row"><td colspan="5">Error loading keys: ${error.message}</td></tr>`;
+            keysTableBody.innerHTML = `<tr class="loading-row"><td colspan="6">Error loading keys: ${error.message}</td></tr>`;
         }
     }
 }
@@ -404,14 +412,21 @@ async function editKey(keyId) {
 }
 
 // Update key
-async function updateKey(keyId, keyValue, used) {
+async function updateKey(keyId, keyValue, planId, used) {
     try {
-        console.log('Updating key:', keyId, keyValue, used);
+        console.log('Updating key:', keyId, keyValue, 'Plan ID:', planId, 'Used:', used);
+        
+        // Validate plan_id
+        if (!planId) {
+            showErrorMessage('Please select a plan');
+            return;
+        }
         
         const { error } = await supabase
             .from('Key')
             .update({
                 key_value: keyValue,
+                plan_id: parseInt(planId),
                 used: used,
                 updated_at: new Date().toISOString()
             })
@@ -554,17 +569,26 @@ function showEditKeyModal(key) {
             <h3>Edit Key</h3>
             <div class="form-group">
                 <label>Key Value:</label>
-                <input type="text" id="edit-key-value" value="${key.key_value}" maxlength="16" />
+                <input type="text" id="edit-key-value" class="form-control" value="${key.key_value}" maxlength="16" />
+            </div>
+            <div class="form-group">
+                <label>Plan ID:</label>
+                                    <select id="edit-key-plan-id" class="form-control" required>
+                        <option value="">Select a plan</option>
+                        <option value="1" ${key.plan_id === 1 ? 'selected' : ''}>1 - Free ($0.00/month)</option>
+                        <option value="2" ${key.plan_id === 2 ? 'selected' : ''}>2 - Pro ($29.99/month)</option>
+                        <option value="3" ${key.plan_id === 3 ? 'selected' : ''}>3 - Business ($99.99/month)</option>
+                    </select>
             </div>
             <div class="form-group">
                 <label>Status:</label>
-                <select id="edit-key-used">
+                <select id="edit-key-used" class="form-control">
                     <option value="false" ${!key.used ? 'selected' : ''}>Available</option>
                     <option value="true" ${key.used ? 'selected' : ''}>Used</option>
                 </select>
             </div>
             <div class="modal-actions">
-                <button onclick="updateKey('${key.id}', document.getElementById('edit-key-value').value, document.getElementById('edit-key-used').value === 'true')">
+                <button onclick="updateKey('${key.id}', document.getElementById('edit-key-value').value, document.getElementById('edit-key-plan-id').value, document.getElementById('edit-key-used').value === 'true')">
                     Update
                 </button>
                 <button onclick="this.closest('.modal-overlay').remove()">Cancel</button>
@@ -587,19 +611,28 @@ function showEditKeyModal(key) {
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
         modal.innerHTML = `
-            <div class="modal-content">
-                <h3>Add New Key</h3>
-                <div class="form-group">
-                    <label>Key Value:</label>
-                    <input type="text" id="add-key-value" placeholder="Enter 16-character key" maxlength="16" />
-                </div>
-                <div class="form-group">
-                    <label>Status:</label>
-                    <select id="add-key-used">
-                        <option value="false" selected>Available</option>
-                        <option value="true">Used</option>
+                    <div class="modal-content">
+            <h3>Add New Key</h3>
+            <div class="form-group">
+                <label>Key Value:</label>
+                <input type="text" id="add-key-value" class="form-control" placeholder="Enter 16-character key" maxlength="16" />
+            </div>
+            <div class="form-group">
+                <label>Plan ID:</label>
+                                    <select id="add-key-plan-id" class="form-control" required>
+                        <option value="">Select a plan</option>
+                        <option value="1">1 - Free ($0.00/month)</option>
+                        <option value="2">2 - Pro ($29.99/month)</option>
+                        <option value="3">3 - Business ($99.99/month)</option>
                     </select>
-                </div>
+            </div>
+            <div class="form-group">
+                <label>Status:</label>
+                <select id="add-key-used" class="form-control">
+                    <option value="false" selected>Available</option>
+                    <option value="true">Used</option>
+                </select>
+            </div>
                 <div class="modal-actions">
                     <button onclick="addNewKey()">Add Key</button>
                     <button onclick="this.closest('.modal-overlay').remove()">Cancel</button>
@@ -627,10 +660,16 @@ function showEditKeyModal(key) {
     async function addNewKey() {
         try {
             const keyValue = document.getElementById('add-key-value').value.trim();
+            const planId = document.getElementById('add-key-plan-id').value;
             const used = document.getElementById('add-key-used').value === 'true';
             
             if (!keyValue) {
                 showErrorMessage('Please enter a key value');
+                return;
+            }
+            
+            if (!planId) {
+                showErrorMessage('Please select a plan');
                 return;
             }
             
@@ -639,12 +678,13 @@ function showEditKeyModal(key) {
                 return;
             }
             
-            console.log('Adding new key:', keyValue, 'Used:', used);
+            console.log('Adding new key:', keyValue, 'Plan ID:', planId, 'Used:', used);
             
             // Use the RLS-bypass function for admin users
             const { data: newKeyId, error } = await supabase
                 .rpc('add_key_by_admin', {
                     key_value: keyValue,
+                    plan_id: parseInt(planId),
                     is_used: used
                 });
             
@@ -841,10 +881,11 @@ function addKeysTabStyles() {
         }
         
         .modal-content {
-            background: white;
+            background: #16213e;
             padding: 20px;
             border-radius: 8px;
             min-width: 300px;
+            color: #fff;
         }
         
         .form-group {
@@ -855,14 +896,41 @@ function addKeysTabStyles() {
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
+            color: #ccc;
         }
         
         .form-group input,
         .form-group select {
             width: 100%;
             padding: 8px;
-            border: 1px solid #ddd;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #00d4ff;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+        
+        /* Control dropdown width to match input field */
+        .form-group select.form-control {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        
+        /* Ensure dropdown options don't expand beyond the select width */
+        .form-group select.form-control option {
+            width: 100%;
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .modal-actions {
@@ -890,18 +958,21 @@ function addKeysTabStyles() {
         }
         
         .add-key-section {
-            background: #f8f9fa;
+            background: rgba(255, 255, 255, 0.05);
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .add-key-section input {
             padding: 8px;
-            border: 1px solid #ddd;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 4px;
             margin-right: 10px;
             width: 200px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
         }
         
         .add-key-section button {
@@ -915,16 +986,17 @@ function addKeysTabStyles() {
         }
         
         .key-stat {
-            background: white;
+            background: rgba(255, 255, 255, 0.05);
             padding: 15px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .key-stat h3 {
             margin: 0;
-            color: #007bff;
+            color: #00d4ff;
         }
         
         .key-stat p {
