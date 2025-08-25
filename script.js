@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeFAQ();
     initializeHeroSection();
     initializeUserAuth();
+    initializeMobileNavigation();
     
     // Initialize pricing plans with retry mechanism
     initializePricingPlansWithRetry();
@@ -24,6 +25,89 @@ function initializeHeroSection() {
     initializeInteractiveElements();
     initializeParticleEffects();
     initializeVideoPlaceholder();
+}
+
+// Initialize Mobile Navigation
+function initializeMobileNavigation() {
+    const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+    const mobileNavMenu = document.getElementById('mobile-nav-menu');
+    const body = document.body;
+    
+    if (mobileNavToggle && mobileNavMenu) {
+        // Toggle mobile menu
+        mobileNavToggle.addEventListener('click', function() {
+            const isActive = mobileNavMenu.classList.contains('active');
+            
+            if (isActive) {
+                // Close menu
+                mobileNavMenu.classList.remove('active');
+                mobileNavToggle.classList.remove('active');
+                body.classList.remove('mobile-menu-open');
+            } else {
+                // Open menu
+                mobileNavMenu.classList.add('active');
+                mobileNavToggle.classList.add('active');
+                body.classList.add('mobile-menu-open');
+            }
+        });
+        
+        // Close menu when clicking on navigation links
+        const mobileNavLinks = mobileNavMenu.querySelectorAll('.mobile-nav-link');
+        mobileNavLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                mobileNavMenu.classList.remove('active');
+                mobileNavToggle.classList.remove('active');
+                body.style.overflow = '';
+            });
+        });
+        
+        // Close menu when clicking on auth buttons
+        const mobileAuthButtons = mobileNavMenu.querySelectorAll('.mobile-nav-btn');
+        mobileAuthButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                mobileNavMenu.classList.remove('active');
+                mobileNavToggle.classList.remove('active');
+                body.style.overflow = '';
+            });
+        });
+        
+        // Close menu when clicking on profile items
+        const mobileProfileItems = mobileNavMenu.querySelectorAll('.mobile-profile-item');
+        mobileProfileItems.forEach(item => {
+            item.addEventListener('click', function() {
+                mobileNavMenu.classList.remove('active');
+                mobileNavToggle.classList.remove('active');
+                body.style.overflow = '';
+            });
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!mobileNavToggle.contains(event.target) && !mobileNavMenu.contains(event.target)) {
+                mobileNavMenu.classList.remove('active');
+                mobileNavToggle.classList.remove('active');
+                body.style.overflow = '';
+            }
+        });
+        
+        // Handle escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                mobileNavMenu.classList.remove('active');
+                mobileNavToggle.classList.remove('active');
+                body.style.overflow = '';
+            }
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 1024) {
+                mobileNavMenu.classList.remove('active');
+                mobileNavToggle.classList.remove('active');
+                body.style.overflow = '';
+            }
+        });
+    }
 }
 
 // Initialize Video Placeholder

@@ -197,13 +197,17 @@
                 <div class="nav-logo">
                     <h2 class="logo-text">Panda</h2>
                 </div>
-                <div class="nav-links">
+                
+                <!-- Desktop Navigation -->
+                <div class="nav-links desktop-nav">
                     <a href="#features" class="nav-link">Features</a>
                     <a href="#download" class="nav-link">Download</a>
                     <a href="#guide" class="nav-link">Guide</a>
                     <a href="#contact" class="nav-link">Contact</a>
                 </div>
-                <div class="nav-auth" id="nav-auth-buttons">
+                
+                <!-- Desktop Auth Buttons -->
+                <div class="nav-auth desktop-nav" id="nav-auth-buttons">
                     <a href="sign-in.html" class="nav-btn signin-btn">
                         <span class="btn-icon"><i class="fas fa-sign-in-alt"></i></span>
                         <span class="btn-text">SIGN IN</span>
@@ -213,7 +217,9 @@
                         <span class="btn-text">SIGN UP</span>
                     </a>
                 </div>
-                <div class="nav-profile" id="nav-profile" style="display: none;">
+                
+                <!-- Desktop Profile -->
+                <div class="nav-profile desktop-nav" id="nav-profile" style="display: none;">
                     <div class="profile-dropdown">
                         <div class="profile-btn">
                             <div class="profile-avatar">
@@ -237,6 +243,67 @@
                             </a>
                             <div class="dropdown-divider"></div>
                             <a href="#" class="dropdown-item" id="logout-btn">
+                                <span class="item-icon"><i class="fas fa-sign-out-alt"></i></span>
+                                <span>Logout</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mobile Hamburger Button -->
+                <div class="mobile-nav-toggle" id="mobile-nav-toggle">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </div>
+            </div>
+            
+            <!-- Mobile Navigation Menu -->
+            <div class="mobile-nav-menu" id="mobile-nav-menu">
+                <div class="mobile-nav-container">
+                    <div class="mobile-nav-links">
+                        <a href="#features" class="mobile-nav-link">Features</a>
+                        <a href="#download" class="mobile-nav-link">Download</a>
+                        <a href="#guide" class="mobile-nav-link">Guide</a>
+                        <a href="#contact" class="mobile-nav-link">Contact</a>
+                    </div>
+                    
+                    <div class="mobile-nav-auth" id="mobile-nav-auth-buttons">
+                        <a href="sign-in.html" class="mobile-nav-btn signin-btn">
+                            <span class="btn-icon"><i class="fas fa-sign-in-alt"></i></span>
+                            <span class="btn-text">SIGN IN</span>
+                        </a>
+                        <a href="sign-up.html" class="mobile-nav-btn signup-btn">
+                            <span class="btn-icon"><i class="fas fa-rocket"></i></span>
+                            <span class="btn-text">SIGN UP</span>
+                        </a>
+                    </div>
+                    
+                    <div class="mobile-nav-profile" id="mobile-nav-profile" style="display: none;">
+                        <div class="mobile-profile-info">
+                            <div class="mobile-profile-avatar">
+                                <span class="avatar-text">JD</span>
+                            </div>
+                            <div class="mobile-profile-details">
+                                <span class="mobile-profile-name">John Doe</span>
+                                <span class="mobile-profile-email">john@example.com</span>
+                            </div>
+                        </div>
+                        <div class="mobile-profile-menu">
+                            <a href="profile.html" class="mobile-profile-item">
+                                <span class="item-icon"><i class="fas fa-user"></i></span>
+                                <span>My Profile</span>
+                            </a>
+                            <a href="profile.html#account-tab" class="mobile-profile-item">
+                                <span class="item-icon"><i class="fas fa-cog"></i></span>
+                                <span>Settings</span>
+                            </a>
+                            <a href="admin-dashboard.html" class="mobile-profile-item admin-link" style="display:none;">
+                                <span class="item-icon"><i class="fas fa-lock"></i></span>
+                                <span>Admin</span>
+                            </a>
+                            <div class="mobile-profile-divider"></div>
+                            <a href="#" class="mobile-profile-item" id="mobile-logout-btn">
                                 <span class="item-icon"><i class="fas fa-sign-out-alt"></i></span>
                                 <span>Logout</span>
                             </a>
