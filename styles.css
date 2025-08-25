@@ -7754,7 +7754,10 @@ body {
         gap: 1.5rem;
         padding: 0 0.5rem;
     }
-    
+    .hero-content {
+        
+        margin-top: 2rem;
+    }
     .hero-title {
         font-size: 2rem;
     }
