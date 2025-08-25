@@ -731,12 +731,12 @@ function getFeatureDemoContent(featureType) {
             <div class="feature-demo-content">
                 <div class="demo-visual">
                     <div class="latency-demo">
-                        <div class="phone-screen">📱</div>
+                        <div class="phone-screen"><i class="fas fa-mobile-alt"></i></div>
                         <div class="latency-indicator">
                             <div class="latency-bar"></div>
                             <div class="latency-text">&lt;10ms</div>
                         </div>
-                        <div class="pc-screen">🖥️</div>
+                        <div class="pc-screen"><i class="fas fa-desktop"></i></div>
                     </div>
                 </div>
                 <div class="demo-info">
@@ -802,17 +802,17 @@ function getFeatureDemoContent(featureType) {
                     <div class="connection-demo">
                         <div class="connection-steps">
                             <div class="step">
-                                <div class="step-icon">📱</div>
+                                <div class="step-icon"><i class="fas fa-mobile-alt"></i></div>
                                 <div class="step-text">Connect Device</div>
                             </div>
                             <div class="step-arrow">→</div>
                             <div class="step">
-                                <div class="step-icon">⚡</div>
+                                <div class="step-icon"><i class="fas fa-bolt"></i></div>
                                 <div class="step-text">Auto-Detect</div>
                             </div>
                             <div class="step-arrow">→</div>
                             <div class="step">
-                                <div class="step-icon">🎯</div>
+                                <div class="step-icon"><i class="fas fa-play"></i></div>
                                 <div class="step-text">Start Mirroring</div>
                             </div>
                         </div>
@@ -844,7 +844,7 @@ function getFeatureDemoContent(featureType) {
                     <div class="gaming-demo">
                         <div class="game-screen">
                             <div class="game-ui">
-                                <div class="game-controller">🎮</div>
+                                <div class="game-controller"><i class="fas fa-gamepad"></i></div>
                                 <div class="performance-metrics">
                                     <div class="metric">FPS: 60</div>
                                     <div class="metric">Latency: 0ms</div>
@@ -918,7 +918,7 @@ function getFeatureDemoContent(featureType) {
                 <div class="demo-visual">
                     <div class="security-demo">
                         <div class="security-shield">
-                            <div class="shield-icon">🛡️</div>
+                            <div class="shield-icon"><i class="fas fa-shield-alt"></i></div>
                             <div class="security-layers">
                                 <div class="layer">256-bit Encryption</div>
                                 <div class="layer">Local Processing</div>
@@ -994,10 +994,10 @@ function playDemo() {
         playButton.textContent = '⏸';
         videoScreen.innerHTML = `
             <div class="demo-animation">
-                <div class="phone-demo">📱</div>
-                <div class="connection-demo">🔗</div>
-                <div class="pc-demo">🖥️</div>
-                <div class="mirror-effect">✨</div>
+                <div class="phone-demo"><i class="fas fa-mobile-alt"></i></div>
+                <div class="connection-demo"><i class="fas fa-link"></i></div>
+                <div class="pc-demo"><i class="fas fa-desktop"></i></div>
+                <div class="mirror-effect"><i class="fas fa-star"></i></div>
             </div>
         `;
         
@@ -1565,21 +1565,21 @@ function showContactModal() {
                 <p>Our support team is here to help you with any questions about Mirror Web.</p>
                 <div class="contact-methods">
                     <div class="contact-method">
-                        <div class="contact-icon">📧</div>
+                        <div class="contact-icon"><i class="fas fa-envelope"></i></div>
                         <div class="contact-details">
                             <h4>Email Support</h4>
                             <p>support@mirrorweb.com</p>
                         </div>
                     </div>
                     <div class="contact-method">
-                        <div class="contact-icon">💬</div>
+                        <div class="contact-icon"><i class="fas fa-comments"></i></div>
                         <div class="contact-details">
                             <h4>Live Chat</h4>
                             <p>Available 24/7</p>
                         </div>
                     </div>
                     <div class="contact-method">
-                        <div class="contact-icon">📖</div>
+                        <div class="contact-icon"><i class="fas fa-book"></i></div>
                         <div class="contact-details">
                             <h4>Documentation</h4>
                             <p>Complete setup guides</p>
@@ -2145,14 +2145,14 @@ function createPlanCard(plan, index) {
 // Get plan icon based on name
 function getPlanIcon(planName) {
     const icons = {
-        'Free Trial': '🚀',
-        'Professional': '⭐',
-        'Enterprise': '🏢',
-        'Basic': '📱',
-        'Premium': '💎',
-        'Ultimate': '🚀'
+        'Free Trial': '<i class="fas fa-rocket"></i>',
+        'Professional': '<i class="fas fa-star"></i>',
+        'Enterprise': '<i class="fas fa-building"></i>',
+        'Basic': '<i class="fas fa-mobile-alt"></i>',
+        'Premium': '<i class="fas fa-gem"></i>',
+        'Ultimate': '<i class="fas fa-rocket"></i>'
     };
-    return icons[planName] || '📋';
+    return icons[planName] || '<i class="fas fa-clipboard"></i>';
 }
 
 // Get default features based on plan name
@@ -2217,21 +2217,21 @@ function showContactModal() {
                 <p>Our sales team is here to help you with enterprise solutions and custom pricing.</p>
                 <div class="contact-methods">
                     <div class="contact-method">
-                        <div class="contact-icon">📧</div>
+                        <div class="contact-icon"><i class="fas fa-envelope"></i></div>
                         <div class="contact-details">
                             <h4>Email Sales</h4>
                             <p>sales@mirrorweb.com</p>
                         </div>
                     </div>
                     <div class="contact-method">
-                        <div class="contact-icon">💬</div>
+                        <div class="contact-icon"><i class="fas fa-comments"></i></div>
                         <div class="contact-details">
                             <h4>Live Chat</h4>
                             <p>Available 24/7</p>
                         </div>
                     </div>
                     <div class="contact-method">
-                        <div class="contact-icon">📞</div>
+                        <div class="contact-icon"><i class="fas fa-phone"></i></div>
                         <div class="contact-details">
                             <h4>Phone Support</h4>
                             <p>+1 (555) 123-4567</p>

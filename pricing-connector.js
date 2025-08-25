@@ -94,11 +94,11 @@ function createPricingCard(pkg, cardType) {
     }
     
     // Determine plan icon
-    let planIcon = '🚀';
+    let planIcon = '<i class="fas fa-rocket"></i>';
     if (cardType === 'professional') {
-        planIcon = '⭐';
+        planIcon = '<i class="fas fa-star"></i>';
     } else if (cardType === 'enterprise') {
-        planIcon = '🏢';
+        planIcon = '<i class="fas fa-building"></i>';
     }
     
     // Determine button text - all buttons now show "Get Now"

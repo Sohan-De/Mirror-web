@@ -1569,7 +1569,7 @@ body {
 .feature-icon {
     font-size: 2rem;
     filter: drop-shadow(0 0 15px rgba(0, 212, 255, 0.8));
-    animation: float 3s ease-in-out infinite;
+    /* animation: float 3s ease-in-out infinite; */
 }
 
 .icon-glow {
@@ -1609,6 +1609,7 @@ body {
     animation-delay: 1.5s;
 }
 
+/* OLD INDICATORS - DISABLED FOR PANDA
 .quality-indicator {
     position: absolute;
     bottom: -15px;
@@ -1725,6 +1726,7 @@ body {
 .audio-waves .wave:nth-child(1) { height: 10px; animation-delay: 0s; }
 .audio-waves .wave:nth-child(2) { height: 20px; animation-delay: 0.2s; }
 .audio-waves .wave:nth-child(3) { height: 15px; animation-delay: 0.4s; }
+*/
 
 .security-indicator {
     position: absolute;
@@ -2570,7 +2572,7 @@ body {
     font-size: 2.5rem;
     margin-bottom: 0.8rem;
     filter: drop-shadow(0 0 15px rgba(0, 212, 255, 0.5));
-    animation: float 3s ease-in-out infinite;
+    /* animation: float 3s ease-in-out infinite; */
 }
 
 .plan-name {

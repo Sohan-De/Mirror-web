@@ -3,9 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mirror Web - Professional Screen Projection Software</title>
+    <title>Panda - Professional Multi-Device Management Software</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Couleurs uniformes pour les étapes du guide - Vert comme les fonctionnalités */
+        .guide-step .step-icon i {
+            color: #00ff88 !important;
+            filter: drop-shadow(0 0 10px rgba(0, 255, 136, 0.5));
+        }
+        
+        /* Animation hover pour les icônes */
+        .step-icon i {
+            transition: all 0.3s ease;
+        }
+        
+        .step-icon:hover i {
+            transform: scale(1.2);
+            filter: drop-shadow(0 0 15px rgba(0, 255, 136, 0.8));
+        }
+        
+        /* Couleurs uniformes pour les icônes des plans - Vert comme les autres */
+        .plan-icon i {
+            color: #00ff88 !important;
+            filter: drop-shadow(0 0 10px rgba(0, 255, 136, 0.5));
+        }
+        
+        /* Supprimer les animations de vol des icônes */
+        .feature-icon {
+            animation: none !important;
+        }
+        
+        .faq-icon-text i {
+            animation: none !important;
+        }
+        
+        .plan-icon i {
+            animation: none !important;
+        }
+        
+        /* Footer copyright text in white */
+        .footer-copyright p {
+            color: white !important;
+        }
+    </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
@@ -153,7 +195,7 @@
         <nav class="navbar">
             <div class="nav-container">
                 <div class="nav-logo">
-                    <h2 class="logo-text">Mirror Web</h2>
+                    <h2 class="logo-text">Panda</h2>
                 </div>
                 <div class="nav-links">
                     <a href="#features" class="nav-link">Features</a>
@@ -163,11 +205,11 @@
                 </div>
                 <div class="nav-auth" id="nav-auth-buttons">
                     <a href="sign-in.html" class="nav-btn signin-btn">
-                        <span class="btn-icon">📖</span>
+                        <span class="btn-icon"><i class="fas fa-sign-in-alt"></i></span>
                         <span class="btn-text">SIGN IN</span>
                     </a>
                     <a href="sign-up.html" class="nav-btn signup-btn">
-                        <span class="btn-icon">🚀</span>
+                        <span class="btn-icon"><i class="fas fa-rocket"></i></span>
                         <span class="btn-text">SIGN UP</span>
                     </a>
                 </div>
@@ -182,20 +224,20 @@
                         </div>
                         <div class="dropdown-menu">
                             <a href="profile.html" class="dropdown-item">
-                                <span class="item-icon">👤</span>
+                                <span class="item-icon"><i class="fas fa-user"></i></span>
                                 <span>My Profile</span>
                             </a>
                             <a href="profile.html#account-tab" class="dropdown-item">
-                                <span class="item-icon">⚙️</span>
+                                <span class="item-icon"><i class="fas fa-cog"></i></span>
                                 <span>Settings</span>
                             </a>
                             <a href="admin-dashboard.html" class="dropdown-item admin-link" style="display:none;">
-                                <span class="item-icon">🔐</span>
+                                <span class="item-icon"><i class="fas fa-lock"></i></span>
                                 <span>Admin</span>
                             </a>
                             <div class="dropdown-divider"></div>
                             <a href="#" class="dropdown-item" id="logout-btn">
-                                <span class="item-icon">🚪</span>
+                                <span class="item-icon"><i class="fas fa-sign-out-alt"></i></span>
                                 <span>Logout</span>
                             </a>
                         </div>
@@ -211,22 +253,22 @@
                 <div class="hero-content">
                     <h1 class="hero-title">
                         <span class="title-normal">Professional</span>
-                        <span class="title-highlight">Screen Projection</span>
+                        <span class="title-highlight">Multi-Device Management</span>
                         <span class="title-normal">Software</span>
                     </h1>
                     
                     <p class="hero-description">
-                        Mirror your Android screen to PC with ultra-low latency, high quality, and seamless connectivity. Perfect for presentations, gaming, and content creation.
+                        Control up to 100 devices simultaneously from a single dashboard. Perfect for enterprise management, testing, and bulk operations.
                     </p>
                     
                     <div class="hero-buttons">
                         <div class="hero-buttons-row">
                             <button class="hero-btn primary">
-                                <span class="btn-icon">📱</span>
-                                <span class="btn-text">DOWNLOAD MIRROR WEB</span>
+                                <span class="btn-icon"><i class="fas fa-download"></i></span>
+                                <span class="btn-text">DOWNLOAD PANDA</span>
                             </button>
                             <button class="hero-btn outline">
-                                <span class="btn-icon">📖</span>
+                                <span class="btn-icon"><i class="fas fa-book"></i></span>
                                 <span class="btn-text">SETUP GUIDE</span>
                             </button>
                         </div>
@@ -278,206 +320,173 @@
         <section id="features" class="features-section">
             <div class="features-container">
                     <div class="features-header">
-                        <h2 class="features-title">Why Choose <span class="highlight-text">Mirror Web</span>?</h2>
-                        <p class="features-subtitle">Professional-grade screen projection with enterprise-level features</p>
+                        <h2 class="features-title">Why Choose <span class="highlight-text">Panda</span>?</h2>
+                        <p class="features-subtitle">Professional multi-device management with enterprise-level control</p>
                 </div>
                 
                     <div class="features-showcase">
-                    <!-- Feature 1: Ultra-Low Latency -->
-                    <div class="feature-showcase-item" data-feature="latency">
+                    <!-- Feature 1: Centralized Dashboard -->
+                    <div class="feature-showcase-item" data-feature="dashboard">
                         <div class="feature-visual">
                             <div class="feature-circle">
                                 <div class="feature-icon-wrapper">
-                                    <span class="feature-icon">⚡</span>
+                                    <span class="feature-icon"><i class="fas fa-desktop"></i></span>
                                     <div class="icon-glow"></div>
                                 </div>
-                                <div class="feature-pulse-ring"></div>
-                                <div class="feature-pulse-ring"></div>
-                                <div class="feature-pulse-ring"></div>
-                            </div>
-                        </div>
-                        <div class="feature-content">
-                            <div class="feature-header">
-                                <h3 class="feature-title">Ultra-Low Latency</h3>
-                            </div>
-                            <p class="feature-description">Real-time screen mirroring with ultra-low latency for smooth performance.</p>
-                            <div class="feature-stats">
-                                <div class="stat-item">
-                                    <span class="stat-value">&lt;10ms</span>
-                                    <span class="stat-label">Latency</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-value">60fps</span>
-                                    <span class="stat-label">Frame Rate</span>
-                                </div>
-                            </div>
-                            <div class="feature-action">
-                                <button class="feature-btn" onclick="showFeatureDemo('latency')">
-                                    <span class="btn-text">See in Action</span>
-                                    <span class="btn-arrow">→</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Feature 2: HD Quality -->
-                    <div class="feature-showcase-item" data-feature="quality">
-                        <div class="feature-visual">
-                            <div class="feature-circle">
-                                <div class="feature-icon-wrapper">
-                                    <span class="feature-icon">🎯</span>
-                                    <div class="icon-glow"></div>
-                                </div>
-                                <div class="quality-indicator">
-                                    <div class="quality-bar"></div>
-                                    <div class="quality-bar"></div>
-                                    <div class="quality-bar"></div>
-                                    <div class="quality-bar"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="feature-content">
-                            <div class="feature-header">
-                                <h3 class="feature-title">HD Quality</h3>
-                            </div>
-                            <p class="feature-description">Crystal clear 1080p resolution with HDR support and customization.</p>
-                            <div class="feature-stats">
-                                <div class="stat-item">
-                                    <span class="stat-value">1080p</span>
-                                    <span class="stat-label">Resolution</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-value">HDR</span>
-                                    <span class="stat-label">Support</span>
-                                </div>
-                            </div>
-                            <div class="feature-action">
-                                <button class="feature-btn" onclick="showFeatureDemo('quality')">
-                                    <span class="btn-text">See in Action</span>
-                                    <span class="btn-arrow">→</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Feature 3: Easy Connection -->
-                    <div class="feature-showcase-item" data-feature="connection">
-                        <div class="feature-visual">
-                            <div class="feature-circle">
-                                <div class="feature-icon-wrapper">
-                                    <span class="feature-icon">🔗</span>
-                                    <div class="icon-glow"></div>
-                                </div>
-                                <div class="connection-animation">
-                                    <div class="device-phone">📱</div>
-                                    <div class="connection-line"></div>
-                                    <div class="device-pc">🖥️</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="feature-content">
-                            <div class="feature-header">
-                                <h3 class="feature-title">Easy Connection</h3>
-                            </div>
-                            <p class="feature-description">One-click connection via USB or WiFi with instant setup.</p>
-                            <div class="feature-stats">
-                                <div class="stat-item">
-                                    <span class="stat-value">1-Click</span>
-                                    <span class="stat-label">Setup</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-value">USB/WiFi</span>
-                                    <span class="stat-label">Options</span>
-                                </div>
-                            </div>
-                            <div class="feature-action">
-                                <button class="feature-btn" onclick="showFeatureDemo('connection')">
-                                    <span class="btn-text">See in Action</span>
-                                    <span class="btn-arrow">→</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Feature 4: Gaming Optimized -->
-                    <div class="feature-showcase-item" data-feature="gaming">
-                        <div class="feature-visual">
-                            <div class="feature-circle">
-                                <div class="feature-icon-wrapper">
-                                    <span class="feature-icon">🎮</span>
-                                    <div class="icon-glow"></div>
-                                </div>
-                                <div class="gaming-indicator">
-                                    <div class="game-controller">🎮</div>
-                                    <div class="performance-dots">
-                                        <div class="dot"></div>
-                                        <div class="dot"></div>
-                                        <div class="dot"></div>
+                                <div class="dashboard-indicator">
+                                    <div class="screen-grid">
+                                        <div class="screen-item"></div>
+                                        <div class="screen-item"></div>
+                                        <div class="screen-item"></div>
+                                        <div class="screen-item"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="feature-content">
                             <div class="feature-header">
-                                <h3 class="feature-title">Gaming Optimized</h3>
+                                <h3 class="feature-title">Centralized Dashboard</h3>
                             </div>
-                            <p class="feature-description">Optimized for mobile gaming with zero input lag performance.</p>
+                            <p class="feature-description">Monitor and control all your devices from a single, intuitive dashboard.</p>
                             <div class="feature-stats">
                                 <div class="stat-item">
-                                    <span class="stat-value">0ms</span>
-                                    <span class="stat-label">Input Lag</span>
+                                    <span class="stat-value">1</span>
+                                    <span class="stat-label">Dashboard</span>
                                 </div>
                                 <div class="stat-item">
-                                    <span class="stat-value">Pro</span>
-                                    <span class="stat-label">Mode</span>
+                                    <span class="stat-value">100+</span>
+                                    <span class="stat-label">Devices</span>
                                 </div>
                             </div>
                             <div class="feature-action">
-                                <button class="feature-btn" onclick="showFeatureDemo('gaming')">
+                                <button class="feature-btn" onclick="showFeatureDemo('dashboard')">
                                     <span class="btn-text">See in Action</span>
-                                    <span class="btn-arrow">→</span>
+                                    <span class="btn-arrow"><i class="fas fa-arrow-right"></i></span>
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Feature 5: Recording & Streaming -->
-                    <div class="feature-showcase-item" data-feature="recording">
+                    <!-- Feature 2: Real-Time Monitoring -->
+                    <div class="feature-showcase-item" data-feature="monitoring">
                         <div class="feature-visual">
                             <div class="feature-circle">
                                 <div class="feature-icon-wrapper">
-                                    <span class="feature-icon">📊</span>
+                                    <span class="feature-icon"><i class="fas fa-chart-line"></i></span>
                                     <div class="icon-glow"></div>
                                 </div>
-                                <div class="recording-indicator">
-                                    <div class="record-button">
-                                        <div class="record-dot"></div>
-                                    </div>
-                                    <div class="audio-waves">
-                                        <div class="wave"></div>
-                                        <div class="wave"></div>
-                                        <div class="wave"></div>
+                                <div class="monitoring-indicator">
+                                    <div class="activity-bars">
+                                        <div class="activity-bar"></div>
+                                        <div class="activity-bar"></div>
+                                        <div class="activity-bar"></div>
+                                        <div class="activity-bar"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="feature-content">
                             <div class="feature-header">
-                                <h3 class="feature-title">Recording & Streaming</h3>
+                                <h3 class="feature-title">Real-Time Monitoring</h3>
                             </div>
-                            <p class="feature-description">Built-in 4K recording and live streaming for content creation.</p>
+                            <p class="feature-description">Monitor device status, performance, and activity in real-time.</p>
                             <div class="feature-stats">
-                                <div class="stat-item">
-                                    <span class="stat-value">4K</span>
-                                    <span class="stat-label">Recording</span>
-                                </div>
                                 <div class="stat-item">
                                     <span class="stat-value">Live</span>
-                                    <span class="stat-label">Stream</span>
+                                    <span class="stat-label">Updates</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">24/7</span>
+                                    <span class="stat-label">Monitoring</span>
                                 </div>
                             </div>
                             <div class="feature-action">
-                                <button class="feature-btn" onclick="showFeatureDemo('recording')">
+                                <button class="feature-btn" onclick="showFeatureDemo('monitoring')">
+                                    <span class="btn-text">See in Action</span>
+                                    <span class="btn-arrow"><i class="fas fa-arrow-right"></i></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 3: Bulk Operations -->
+                    <div class="feature-showcase-item" data-feature="bulk">
+                        <div class="feature-visual">
+                            <div class="feature-circle">
+                                <div class="feature-icon-wrapper">
+                                    <span class="feature-icon"><i class="fas fa-bolt"></i></span>
+                                    <div class="icon-glow"></div>
+                                </div>
+                                <div class="bulk-indicator">
+                                    <div class="bulk-devices">
+                                        <div class="device-group"></div>
+                                        <div class="device-group"></div>
+                                    </div>
+                                    <div class="sync-arrow"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feature-content">
+                            <div class="feature-header">
+                                <h3 class="feature-title">Bulk Operations</h3>
+                            </div>
+                            <p class="feature-description">Execute commands and updates across multiple devices simultaneously.</p>
+                            <div class="feature-stats">
+                                <div class="stat-item">
+                                    <span class="stat-value">Mass</span>
+                                    <span class="stat-label">Updates</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">Sync</span>
+                                    <span class="stat-label">Commands</span>
+                                </div>
+                            </div>
+                            <div class="feature-action">
+                                <button class="feature-btn" onclick="showFeatureDemo('bulk')">
+                                    <span class="btn-text">See in Action</span>
+                                    <span class="btn-arrow"><i class="fas fa-arrow-right"></i></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 4: Multi-Device Control -->
+                    <div class="feature-showcase-item" data-feature="multi-device">
+                        <div class="feature-visual">
+                            <div class="feature-circle">
+                                <div class="feature-icon-wrapper">
+                                    <span class="feature-icon"><i class="fas fa-mobile-alt"></i></span>
+                                    <div class="icon-glow"></div>
+                                </div>
+                                <div class="multi-device-indicator">
+                                    <div class="device-grid">
+                                        <div class="device-item"></div>
+                                        <div class="device-item"></div>
+                                        <div class="device-item"></div>
+                                        <div class="device-item"></div>
+                                        <div class="device-item"></div>
+                                        <div class="device-item"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feature-content">
+                            <div class="feature-header">
+                                <h3 class="feature-title">Multi-Device Control</h3>
+                            </div>
+                            <p class="feature-description">Control up to 100 devices simultaneously from a single dashboard.</p>
+                            <div class="feature-stats">
+                                <div class="stat-item">
+                                    <span class="stat-value">100+</span>
+                                    <span class="stat-label">Devices</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">Real-time</span>
+                                    <span class="stat-label">Control</span>
+                                </div>
+                            </div>
+                            <div class="feature-action">
+                                <button class="feature-btn" onclick="showFeatureDemo('multi-device')">
                                     <span class="btn-text">See in Action</span>
                                     <span class="btn-arrow">→</span>
                                 </button>
@@ -485,16 +494,58 @@
                         </div>
                     </div>
 
-                    <!-- Feature 6: Secure & Private -->
+                    <!-- Feature 5: Analytics & Reports -->
+                    <div class="feature-showcase-item" data-feature="analytics">
+                        <div class="feature-visual">
+                            <div class="feature-circle">
+                                <div class="feature-icon-wrapper">
+                                    <span class="feature-icon"><i class="fas fa-chart-bar"></i></span>
+                                    <div class="icon-glow"></div>
+                                </div>
+                                <div class="analytics-indicator">
+                                    <div class="chart-bars">
+                                        <div class="chart-bar"></div>
+                                        <div class="chart-bar"></div>
+                                        <div class="chart-bar"></div>
+                                        <div class="chart-bar"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feature-content">
+                            <div class="feature-header">
+                                <h3 class="feature-title">Analytics & Reports</h3>
+                            </div>
+                            <p class="feature-description">Comprehensive analytics and detailed reports on device performance.</p>
+                            <div class="feature-stats">
+                                <div class="stat-item">
+                                    <span class="stat-value">Real-time</span>
+                                    <span class="stat-label">Analytics</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">Detailed</span>
+                                    <span class="stat-label">Reports</span>
+                                </div>
+                            </div>
+                            <div class="feature-action">
+                                <button class="feature-btn" onclick="showFeatureDemo('analytics')">
+                                    <span class="btn-text">See in Action</span>
+                                    <span class="btn-arrow"><i class="fas fa-arrow-right"></i></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 6: Enterprise Security -->
                     <div class="feature-showcase-item" data-feature="security">
                         <div class="feature-visual">
                             <div class="feature-circle">
                                 <div class="feature-icon-wrapper">
-                                    <span class="feature-icon">🛡️</span>
+                                    <span class="feature-icon"><i class="fas fa-shield-alt"></i></span>
                                     <div class="icon-glow"></div>
                                 </div>
                                 <div class="security-indicator">
-                                    <div class="shield-icon">🛡️</div>
+                                    <div class="shield-icon"></div>
                                     <div class="security-rings">
                                         <div class="ring"></div>
                                         <div class="ring"></div>
@@ -505,23 +556,23 @@
                         </div>
                         <div class="feature-content">
                             <div class="feature-header">
-                                <h3 class="feature-title">Secure & Private</h3>
+                                <h3 class="feature-title">Enterprise Security</h3>
                             </div>
-                            <p class="feature-description">Your data stays private with 256-bit encryption protection.</p>
+                            <p class="feature-description">Bank-level security with role-based access control and audit trails.</p>
                             <div class="feature-stats">
                                 <div class="stat-item">
                                     <span class="stat-value">256-bit</span>
                                     <span class="stat-label">Encryption</span>
                                 </div>
                                 <div class="stat-item">
-                                    <span class="stat-value">Local</span>
-                                    <span class="stat-label">Processing</span>
+                                    <span class="stat-value">RBAC</span>
+                                    <span class="stat-label">Access</span>
                                 </div>
                             </div>
                             <div class="feature-action">
                                 <button class="feature-btn" onclick="showFeatureDemo('security')">
                                     <span class="btn-text">See in Action</span>
-                                    <span class="btn-arrow">→</span>
+                                    <span class="btn-arrow"><i class="fas fa-arrow-right"></i></span>
                                 </button>
                             </div>
                         </div>
@@ -553,10 +604,10 @@
                         </div>
                         <div class="step-content">
                             <div class="step-header">
-                                <div class="step-icon">📥</div>
+                                <div class="step-icon"><i class="fas fa-download"></i></div>
                                 <h3 class="step-title">Download & Install</h3>
                             </div>
-                            <p class="step-description">Get Mirror Web on your PC with our smart installer that handles everything automatically.</p>
+                            <p class="step-description">Get Panda on your PC with our smart installer that handles everything automatically.</p>
                             <div class="step-progress">
                                 <div class="progress-bar">
                                     <div class="progress-fill" style="width: 25%"></div>
@@ -576,7 +627,7 @@
                         </div>
                         <div class="step-content">
                             <div class="step-header">
-                                <div class="step-icon">⚙️</div>
+                                <div class="step-icon"><i class="fas fa-cog"></i></div>
                                 <h3 class="step-title">Enable Developer Mode</h3>
                             </div>
                             <p class="step-description">Unlock your Android's potential by enabling USB debugging in just a few taps.</p>
@@ -599,7 +650,7 @@
                         </div>
                         <div class="step-content">
                             <div class="step-header">
-                                <div class="step-icon">🔗</div>
+                                <div class="step-icon"><i class="fas fa-link"></i></div>
                                 <h3 class="step-title">Connect & Sync</h3>
                             </div>
                             <p class="step-description">Link your devices seamlessly via USB or WiFi for instant mirroring capability.</p>
@@ -621,10 +672,10 @@
                         </div>
                         <div class="step-content">
                             <div class="step-header">
-                                <div class="step-icon">🎯</div>
+                                <div class="step-icon"><i class="fas fa-play"></i></div>
                                 <h3 class="step-title">Start Mirroring</h3>
                             </div>
-                            <p class="step-description">Launch Mirror Web and experience professional-grade screen projection instantly.</p>
+                            <p class="step-description">Launch Panda and experience professional multi-device management instantly.</p>
                             <div class="step-progress">
                                 <div class="progress-bar">
                                     <div class="progress-fill" style="width: 100%"></div>
@@ -639,7 +690,7 @@
                     <button class="guide-cta-btn" onclick="showGuideModal()">
                         <span class="btn-glow"></span>
                         <span class="btn-content">
-                            <span class="btn-icon">📖</span>
+                            <span class="btn-icon"><i class="fas fa-book"></i></span>
                             <span class="btn-text">View Complete Guide</span>
                         </span>
                     </button>
@@ -670,7 +721,7 @@
             <div class="faq-container">
                 <div class="faq-header">
                     <h2 class="faq-title">Frequently Asked <span class="highlight-text">Questions</span></h2>
-                    <p class="faq-subtitle">Everything you need to know about Mirror Web</p>
+                    <p class="faq-subtitle">Everything you need to know about Panda</p>
                 </div>
                 
                 <div class="faq-grid">
@@ -678,10 +729,10 @@
                     <div class="faq-item" data-faq="1">
                         <div class="faq-question">
                             <div class="faq-icon">
-                                <span class="faq-icon-text">⚡</span>
+                                <span class="faq-icon-text"><i class="fas fa-bolt"></i></span>
                                 <div class="faq-icon-glow"></div>
                             </div>
-                            <h3 class="faq-question-text">How does Mirror Web work?</h3>
+                            <h3 class="faq-question-text">How does Panda work?</h3>
                             <div class="faq-toggle">
                                 <span class="toggle-line"></span>
                                 <span class="toggle-line"></span>
@@ -689,18 +740,18 @@
                         </div>
                         <div class="faq-answer">
                             <div class="answer-content">
-                                <p>Mirror Web uses advanced screen mirroring technology to create a seamless connection between your Android device and PC. Simply connect via USB or WiFi, and your phone's screen will be instantly projected to your computer with ultra-low latency and HD quality.</p>
+                                <p>Panda uses advanced device management technology to create a centralized control system for multiple devices. Simply connect your devices via USB or WiFi, and you can monitor and control up to 100 devices simultaneously from a single dashboard.</p>
                                 <div class="answer-features">
                                     <div class="answer-feature">
-                                        <span class="feature-dot">⚡</span>
+                                        <span class="feature-dot"><i class="fas fa-bolt"></i></span>
                                         <span>Instant connection</span>
                                     </div>
                                     <div class="answer-feature">
-                                        <span class="feature-dot">🎯</span>
+                                        <span class="feature-dot"><i class="fas fa-check-circle"></i></span>
                                         <span>HD quality output</span>
                                     </div>
                                     <div class="answer-feature">
-                                        <span class="feature-dot">🔒</span>
+                                        <span class="feature-dot"><i class="fas fa-lock"></i></span>
                                         <span>Secure & private</span>
                                     </div>
                                 </div>
@@ -712,7 +763,7 @@
                     <div class="faq-item" data-faq="2">
                         <div class="faq-question">
                             <div class="faq-icon">
-                                <span class="faq-icon-text">📱</span>
+                                <span class="faq-icon-text"><i class="fas fa-mobile-alt"></i></span>
                                 <div class="faq-icon-glow"></div>
                             </div>
                             <h3 class="faq-question-text">What devices are supported?</h3>
@@ -723,18 +774,18 @@
                         </div>
                         <div class="faq-answer">
                             <div class="answer-content">
-                                <p>Mirror Web supports all Android devices running Android 5.0 and above. For PC, we support Windows 10/11, macOS 10.14+, and Linux distributions. The software automatically detects your device and optimizes settings for the best performance.</p>
+                                <p>Panda supports all Android devices running Android 5.0 and above. For PC, we support Windows 10/11, macOS 10.14+, and Linux distributions. The software automatically detects your devices and optimizes settings for the best performance.</p>
                                 <div class="answer-features">
                                     <div class="answer-feature">
-                                        <span class="feature-dot">📱</span>
+                                        <span class="feature-dot"><i class="fas fa-mobile-alt"></i></span>
                                         <span>Android 5.0+</span>
                                     </div>
                                     <div class="answer-feature">
-                                        <span class="feature-dot">🖥️</span>
+                                        <span class="feature-dot"><i class="fab fa-windows"></i></span>
                                         <span>Windows 10/11</span>
                                     </div>
                                     <div class="answer-feature">
-                                        <span class="feature-dot">🍎</span>
+                                        <span class="feature-dot"><i class="fab fa-apple"></i></span>
                                         <span>macOS 10.14+</span>
                                     </div>
                                 </div>
@@ -746,7 +797,7 @@
                     <div class="faq-item" data-faq="3">
                         <div class="faq-question">
                             <div class="faq-icon">
-                                <span class="faq-icon-text">🎁</span>
+                                <span class="faq-icon-text"><i class="fas fa-gift"></i></span>
                                 <div class="faq-icon-glow"></div>
                             </div>
                             <h3 class="faq-question-text">Is there a free trial available?</h3>
@@ -757,18 +808,18 @@
                         </div>
                         <div class="faq-answer">
                             <div class="answer-content">
-                                <p>Yes! We offer a 7-day free trial with full access to all features. No credit card required. Experience the full power of Mirror Web before making your decision. After the trial, you can choose from our flexible pricing plans.</p>
+                                <p>Yes! We offer a 7-day free trial with full access to all features. No credit card required. Experience the full power of Panda before making your decision. After the trial, you can choose from our flexible pricing plans.</p>
                                 <div class="answer-features">
                                     <div class="answer-feature">
-                                        <span class="feature-dot">🎁</span>
+                                        <span class="feature-dot"><i class="fas fa-gift"></i></span>
                                         <span>7-day free trial</span>
                                     </div>
                                     <div class="answer-feature">
-                                        <span class="feature-dot">💳</span>
+                                        <span class="feature-dot"><i class="fas fa-credit-card"></i></span>
                                         <span>No credit card</span>
                                     </div>
                                     <div class="answer-feature">
-                                        <span class="feature-dot">✨</span>
+                                        <span class="feature-dot"><i class="fas fa-star"></i></span>
                                         <span>Full features</span>
                                     </div>
                                 </div>
@@ -780,10 +831,10 @@
                     <div class="faq-item" data-faq="4">
                         <div class="faq-question">
                             <div class="faq-icon">
-                                <span class="faq-icon-text">🎬</span>
+                                <span class="faq-icon-text"><i class="fas fa-desktop"></i></span>
                                 <div class="faq-icon-glow"></div>
                             </div>
-                            <h3 class="faq-question-text">Can I record my screen while mirroring?</h3>
+                            <h3 class="faq-question-text">Can I monitor multiple devices simultaneously?</h3>
                             <div class="faq-toggle">
                                 <span class="toggle-line"></span>
                                 <span class="toggle-line"></span>
@@ -791,18 +842,18 @@
                         </div>
                         <div class="faq-answer">
                             <div class="answer-content">
-                                <p>Absolutely! Mirror Web includes built-in recording capabilities. You can record your mirrored screen in up to 4K resolution with audio. Perfect for creating tutorials, gameplay videos, or documenting your mobile workflow.</p>
+                                <p>Absolutely! Panda includes built-in multi-device monitoring capabilities. You can monitor and control up to 100 devices simultaneously from a single dashboard. Perfect for enterprise management, testing, and bulk operations.</p>
                                 <div class="answer-features">
                                     <div class="answer-feature">
-                                        <span class="feature-dot">🎬</span>
-                                        <span>4K recording</span>
+                                        <span class="feature-dot"><i class="fas fa-desktop"></i></span>
+                                        <span>Multi-device monitoring</span>
                                     </div>
                                     <div class="answer-feature">
-                                        <span class="feature-dot">🎵</span>
-                                        <span>Audio included</span>
+                                        <span class="feature-dot"><i class="fas fa-chart-line"></i></span>
+                                        <span>Real-time analytics</span>
                                     </div>
                                     <div class="answer-feature">
-                                        <span class="feature-dot">📹</span>
+                                        <span class="feature-dot"><i class="fas fa-cogs"></i></span>
                                         <span>Built-in feature</span>
                                     </div>
                                 </div>
@@ -814,7 +865,7 @@
                     <div class="faq-item" data-faq="5">
                         <div class="faq-question">
                             <div class="faq-icon">
-                                <span class="faq-icon-text">🔐</span>
+                                <span class="faq-icon-text"><i class="fas fa-lock"></i></span>
                                 <div class="faq-icon-glow"></div>
                             </div>
                             <h3 class="faq-question-text">How secure is my data?</h3>
@@ -825,18 +876,18 @@
                         </div>
                         <div class="faq-answer">
                             <div class="answer-content">
-                                <p>Your privacy and security are our top priorities. Mirror Web uses 256-bit encryption and processes all data locally on your device. We never store, transmit, or access your personal information or screen content.</p>
+                                <p>Your privacy and security are our top priorities. Panda uses 256-bit encryption and processes all data locally on your device. We never store, transmit, or access your personal information or device content.</p>
                                 <div class="answer-features">
                                     <div class="answer-feature">
-                                        <span class="feature-dot">🔐</span>
+                                        <span class="feature-dot"><i class="fas fa-lock"></i></span>
                                         <span>256-bit encryption</span>
                                     </div>
                                     <div class="answer-feature">
-                                        <span class="feature-dot">🏠</span>
+                                        <span class="feature-dot"><i class="fas fa-home"></i></span>
                                         <span>Local processing</span>
                                     </div>
                                     <div class="answer-feature">
-                                        <span class="feature-dot">🛡️</span>
+                                        <span class="feature-dot"><i class="fas fa-shield-alt"></i></span>
                                         <span>Zero data collection</span>
                                     </div>
                                 </div>
@@ -848,7 +899,7 @@
                     <div class="faq-item" data-faq="6">
                         <div class="faq-question">
                             <div class="faq-icon">
-                                <span class="faq-icon-text">💬</span>
+                                <span class="faq-icon-text"><i class="fas fa-comments"></i></span>
                                 <div class="faq-icon-glow"></div>
                             </div>
                             <h3 class="faq-question-text">What if I need technical support?</h3>
@@ -862,15 +913,15 @@
                                 <p>We provide comprehensive technical support for all users. Free trial users get email support, while Professional and Enterprise users receive priority support with faster response times and dedicated assistance.</p>
                                 <div class="answer-features">
                                     <div class="answer-feature">
-                                        <span class="feature-dot">📧</span>
+                                        <span class="feature-dot"><i class="fas fa-envelope"></i></span>
                                         <span>Email support</span>
                                     </div>
                                     <div class="answer-feature">
-                                        <span class="feature-dot">⚡</span>
+                                        <span class="feature-dot"><i class="fas fa-bolt"></i></span>
                                         <span>Priority response</span>
                                     </div>
                                     <div class="answer-feature">
-                                        <span class="feature-dot">👨‍💻</span>
+                                        <span class="feature-dot"><i class="fas fa-user-tie"></i></span>
                                         <span>Expert assistance</span>
                                     </div>
                                 </div>
@@ -882,9 +933,9 @@
                 <div class="faq-cta">
                     <div class="faq-cta-content">
                         <h3 class="faq-cta-title">Still have <span class="highlight-text">questions</span>?</h3>
-                        <p class="faq-cta-text">Our support team is here to help you get the most out of Mirror Web</p>
+                        <p class="faq-cta-text">Our support team is here to help you get the most out of Panda</p>
                         <button class="faq-cta-btn">
-                            <span class="btn-icon">💬</span>
+                            <span class="btn-icon"><i class="fas fa-comments"></i></span>
                             Contact Support
                         </button>
                     </div>
@@ -896,16 +947,16 @@
         <section id="download" class="download-section">
             <div class="download-container">
                 <div class="download-header">
-                    <h2 class="download-title">Ready to Mirror Your <span class="highlight-text">Screen</span>?</h2>
-                    <p class="download-description">Download Mirror Web today and experience professional-grade screen projection technology.</p>
+                    <h2 class="download-title">Ready to Manage Your <span class="highlight-text">Devices</span>?</h2>
+                    <p class="download-description">Download Panda today and experience professional multi-device management technology.</p>
                 </div>
                 <div class="download-buttons">
                     <button class="download-btn-main android">
                         <span class="play-icon">▶</span>
-                        Download Mirror Web
+                        Download Panda
                     </button>
                     <button class="download-btn-main ios">
-                        <span class="apple-icon">📱</span>
+                        <span class="apple-icon"><i class="fas fa-mobile-alt"></i></span>
                         View Demo
                     </button>
                 </div>
@@ -918,7 +969,7 @@
             <div class="footer-container">
                 <div class="footer-content">
                     <div class="footer-logo">
-                        <h3 class="footer-logo-text">Mirror Web</h3>
+                        <h3 class="footer-logo-text">Panda</h3>
                     </div>
                     <div class="footer-links">
                         <a href="#features" class="footer-link">Features</a>
@@ -928,7 +979,7 @@
                     </div>
                 </div>
                 <div class="footer-copyright">
-                    <p>© 2024 Mirror Web. Professional Screen Projection Software.</p>
+                    <p>© 2024 Panda. Professional Multi-Device Management Software.</p>
                 </div>
             </div>
         </footer>
