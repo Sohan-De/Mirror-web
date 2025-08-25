@@ -298,6 +298,119 @@
             font-size: 14px;
         }
         
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 15px;
+            }
+            
+            .dashboard-header h2 {
+                font-size: 1.5rem;
+            }
+            
+            .dashboard-header p {
+                font-size: 0.9rem;
+            }
+            
+            .tabs {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .tab-button {
+                width: 100%;
+                padding: 12px;
+                font-size: 1rem;
+            }
+            
+            /* Mobile table styles */
+            .admin-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+                font-size: 0.9rem;
+            }
+            
+            .admin-table th,
+            .admin-table td {
+                padding: 10px 8px;
+                min-width: 120px;
+            }
+            
+            /* Search box mobile optimization */
+            .search-box {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .search-box input {
+                width: 100%;
+                padding: 12px;
+                font-size: 1rem;
+            }
+            
+            .refresh-btn {
+                width: 100%;
+                padding: 12px;
+                font-size: 1rem;
+            }
+            
+            /* Pagination mobile */
+            .pagination {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .pagination button {
+                width: 100%;
+                padding: 12px;
+            }
+            
+            /* Add admin form mobile */
+            .add-admin-form {
+                padding: 15px;
+            }
+            
+            .add-admin-form > div {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .add-admin-form input,
+            .add-admin-form button {
+                width: 100%;
+                padding: 12px;
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 10px;
+            }
+            
+            .admin-table th,
+            .admin-table td {
+                padding: 8px 6px;
+                min-width: 100px;
+                font-size: 0.8rem;
+            }
+            
+            .tab-button {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+            
+            .search-box input,
+            .refresh-btn,
+            .pagination button,
+            .add-admin-form input,
+            .add-admin-form button {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+        }
+        
         .key-stat p {
             margin: 5px 0 0 0;
             font-size: 24px;

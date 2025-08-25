@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeFAQ();
     initializeHeroSection();
     initializeUserAuth();
-    initializeMobileNavigation();
+    initializeHamburgerMenu();
     
     // Initialize pricing plans with retry mechanism
     initializePricingPlansWithRetry();
@@ -27,86 +27,138 @@ function initializeHeroSection() {
     initializeVideoPlaceholder();
 }
 
-// Initialize Mobile Navigation
-function initializeMobileNavigation() {
-    const mobileNavToggle = document.getElementById('mobile-nav-toggle');
-    const mobileNavMenu = document.getElementById('mobile-nav-menu');
+// Initialize Hamburger Menu
+function initializeHamburgerMenu() {
+    const hamburgerMenu = document.getElementById('hamburger-menu');
+    const navLinks = document.getElementById('nav-links');
     const body = document.body;
     
-    if (mobileNavToggle && mobileNavMenu) {
-        // Toggle mobile menu
-        mobileNavToggle.addEventListener('click', function() {
-            const isActive = mobileNavMenu.classList.contains('active');
-            
-            if (isActive) {
-                // Close menu
-                mobileNavMenu.classList.remove('active');
-                mobileNavToggle.classList.remove('active');
-                body.classList.remove('mobile-menu-open');
+    if (hamburgerMenu && navLinks) {
+        // Toggle menu when hamburger is clicked
+        hamburgerMenu.addEventListener('click', function() {
+            if (hamburgerMenu.classList.contains('active')) {
+                // If menu is open, close it
+                closeMobileMenu();
             } else {
-                // Open menu
-                mobileNavMenu.classList.add('active');
-                mobileNavToggle.classList.add('active');
-                body.classList.add('mobile-menu-open');
+                // If menu is closed, open it
+                hamburgerMenu.classList.add('active');
+                navLinks.classList.add('active');
+                body.style.overflow = 'hidden';
+                body.classList.add('hamburger-open');
             }
         });
         
-        // Close menu when clicking on navigation links
-        const mobileNavLinks = mobileNavMenu.querySelectorAll('.mobile-nav-link');
-        mobileNavLinks.forEach(link => {
-            link.addEventListener('click', function() {
-                mobileNavMenu.classList.remove('active');
-                mobileNavToggle.classList.remove('active');
-                body.style.overflow = '';
+        // Close menu when clicking on navigation links and scroll to sections
+        const navLinkElements = navLinks.querySelectorAll('.nav-link');
+        navLinkElements.forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Prevent default behavior to allow smooth scrolling
+                e.preventDefault();
+                
+                // Get the target section
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                if (targetSection) {
+                    // Close the hamburger menu first
+                    closeMobileMenu();
+                    
+                    // Wait a bit for menu to close, then scroll to section
+                    setTimeout(() => {
+                        targetSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }, 300); // 300ms delay for smooth menu closing animation
+                }
             });
         });
         
-        // Close menu when clicking on auth buttons
-        const mobileAuthButtons = mobileNavMenu.querySelectorAll('.mobile-nav-btn');
+        // Close menu when clicking on auth buttons (these navigate to different pages)
+        const mobileAuthButtons = navLinks.querySelectorAll('.mobile-auth-btn');
         mobileAuthButtons.forEach(button => {
             button.addEventListener('click', function() {
-                mobileNavMenu.classList.remove('active');
-                mobileNavToggle.classList.remove('active');
-                body.style.overflow = '';
+                closeMobileMenu();
             });
         });
         
-        // Close menu when clicking on profile items
-        const mobileProfileItems = mobileNavMenu.querySelectorAll('.mobile-profile-item');
-        mobileProfileItems.forEach(item => {
-            item.addEventListener('click', function() {
-                mobileNavMenu.classList.remove('active');
-                mobileNavToggle.classList.remove('active');
-                body.style.overflow = '';
+        // Handle mobile profile links
+        const mobileProfileLinks = navLinks.querySelectorAll('.mobile-profile-link');
+        mobileProfileLinks.forEach(link => {
+            if (link.id !== 'mobile-logout-btn') {
+                link.addEventListener('click', function() {
+                    closeMobileMenu();
+                });
+            }
+        });
+        
+        // Handle mobile logout
+        const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+        if (mobileLogoutBtn) {
+            mobileLogoutBtn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                console.log('Mobile logout clicked');
+                
+                try {
+                    // Sign out
+                    const signOutResult = await signOut();
+                    console.log('Sign out result:', signOutResult);
+                    
+                    // Immediately update the UI with !important equivalent
+                    const mobileProfileSection = document.getElementById('mobile-profile-section');
+                    const mobileAuthButtons = document.getElementById('mobile-auth-buttons');
+                    
+                    console.log('Mobile profile section found:', !!mobileProfileSection);
+                    console.log('Mobile auth buttons found:', !!mobileAuthButtons);
+                    
+                    if (mobileProfileSection) {
+                        mobileProfileSection.style.setProperty('display', 'none', 'important');
+                        console.log('Mobile profile section hidden with !important');
+                    }
+                    if (mobileAuthButtons) {
+                        mobileAuthButtons.style.setProperty('display', 'flex', 'important');
+                        console.log('Mobile auth buttons shown with !important');
+                    }
+                    
+                    // Wait a bit for DOM to update, then try to call checkAuthStatus if available
+                    setTimeout(async () => {
+                        if (typeof checkAuthStatus === 'function') {
+                            console.log('Calling checkAuthStatus...');
+                            await checkAuthStatus();
+                            console.log('checkAuthStatus completed');
+                        } else {
+                            console.log('checkAuthStatus function not available');
+                        }
+                    }, 100);
+                    
+                    // Close the mobile menu
+                    closeMobileMenu();
+                    
+                    console.log('Logout process completed');
+                    
+                } catch (error) {
+                    console.error('Error during logout:', error);
+                }
             });
-        });
+        }
         
-        // Close menu when clicking outside
-        document.addEventListener('click', function(event) {
-            if (!mobileNavToggle.contains(event.target) && !mobileNavMenu.contains(event.target)) {
-                mobileNavMenu.classList.remove('active');
-                mobileNavToggle.classList.remove('active');
-                body.style.overflow = '';
-            }
-        });
+        // Only close menu when clicking on the hamburger button again or on auth buttons
+        // Allow users to scroll and interact with page content while menu is open
         
-        // Handle escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                mobileNavMenu.classList.remove('active');
-                mobileNavToggle.classList.remove('active');
-                body.style.overflow = '';
-            }
-        });
-        
-        // Handle window resize
+        // Close menu on window resize (if switching from mobile to desktop)
         window.addEventListener('resize', function() {
             if (window.innerWidth > 1024) {
-                mobileNavMenu.classList.remove('active');
-                mobileNavToggle.classList.remove('active');
-                body.style.overflow = '';
+                closeMobileMenu();
             }
         });
+        
+        // Function to close mobile menu
+        function closeMobileMenu() {
+            hamburgerMenu.classList.remove('active');
+            navLinks.classList.remove('active');
+            body.style.overflow = '';
+            body.classList.remove('hamburger-open');
+        }
     }
 }
 

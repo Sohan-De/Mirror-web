@@ -195,11 +195,31 @@ async function checkAuthStatus() {
                 adminLink.style.display = isAdmin ? 'block' : 'none';
                 console.log('Admin status:', isAdmin); // Debug log
             }
+            
+            // Update mobile profile section
+            const mobileProfileSection = document.getElementById('mobile-profile-section');
+            const mobileAuthButtons = document.getElementById('mobile-auth-buttons');
+            const mobileAvatarText = document.querySelector('.mobile-profile-avatar .avatar-text');
+            const mobileProfileName = document.querySelector('.mobile-profile-name');
+            const mobileAdminLink = document.querySelector('.mobile-profile-section .admin-link');
+            
+            if (mobileProfileSection) mobileProfileSection.style.display = 'flex';
+            if (mobileAuthButtons) mobileAuthButtons.style.display = 'none';
+            if (mobileAvatarText) mobileAvatarText.textContent = initials;
+            if (mobileProfileName) mobileProfileName.textContent = fullName;
+            if (mobileAdminLink) mobileAdminLink.style.display = isAdmin ? 'block' : 'none';
         }
     } else {
         // User is not logged in
         if (navAuthButtons) navAuthButtons.style.display = 'flex';
         if (navProfile) navProfile.style.display = 'none';
+        
+        // Update mobile sections
+        const mobileProfileSection = document.getElementById('mobile-profile-section');
+        const mobileAuthButtons = document.getElementById('mobile-auth-buttons');
+        
+        if (mobileProfileSection) mobileProfileSection.style.display = 'none';
+        if (mobileAuthButtons) mobileAuthButtons.style.display = 'flex';
     }
 }
 

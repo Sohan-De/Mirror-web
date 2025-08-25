@@ -898,12 +898,53 @@
 /* Responsive Design */
 @media (max-width: 1024px) {
     .checkout-container {
+        grid-template-columns: 1fr;
         gap: 30px;
+        max-width: 800px;
+    }
+    
+    .order-summary-card {
+        position: static;
+        margin-bottom: 20px;
     }
     
     .order-summary-card,
     .checkout-form-card {
         padding: 24px;
+    }
+    
+    .checkout-main {
+        padding: 40px 20px;
+    }
+    
+    /* Tablet-specific optimizations */
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .payment-methods {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .payment-method-option {
+        width: 100%;
+    }
+    
+    .crypto-payment-methods {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .wallet-buttons {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .wallet-btn {
+        width: 100%;
+        justify-content: center;
     }
 }
 
@@ -919,6 +960,7 @@
     .checkout-container {
         grid-template-columns: 1fr;
         gap: 30px;
+        max-width: 600px;
     }
     
     .order-summary-card {

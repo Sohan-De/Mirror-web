@@ -5,15 +5,27 @@ async function loadSubscriptionPackages() {
     try {
         console.log('Loading subscription packages for pricing section...');
         
+        // Check if Supabase is available
+        if (typeof supabase === 'undefined') {
+            console.error('Supabase client not available');
+            return null;
+        }
+        
+        console.log('Supabase client available, querying packages...');
+        
         const { data, error } = await supabase
             .from('subscription_packages')
             .select('*')
             .eq('status', 'active')
             .order('price', { ascending: true });
         
-        if (error) throw error;
+        if (error) {
+            console.error('Supabase query error:', error);
+            throw error;
+        }
         
         console.log('Loaded subscription packages:', data);
+        console.log('Package count:', data ? data.length : 0);
         return data;
     } catch (error) {
         console.error('Error loading subscription packages:', error.message);
@@ -162,13 +174,18 @@ function createPricingCard(pkg, cardType) {
         </button>
     `;
     
-    // Add click event to handle subscription selection
-    const button = card.querySelector('.pricing-btn');
-    if (button) {
-        button.addEventListener('click', function() {
-            selectSubscription(pkg.id, pkg.name);
-        });
-    }
+            // Add click event to handle subscription selection
+        const button = card.querySelector('.pricing-btn');
+        if (button) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log(`Button clicked for package: ${pkg.name}`);
+                selectSubscription(pkg.id, pkg.name);
+            });
+        } else {
+            console.error(`No button found in card for ${pkg.name}`);
+        }
     
     return card;
 }
@@ -189,8 +206,17 @@ function selectSubscription(packageId, packageName) {
         checkoutPackageId = 'business';
     }
     
-    // Redirect to checkout page
-    window.location.href = `checkout.html?package=${checkoutPackageId}`;
+    console.log(`Redirecting to checkout with package: ${checkoutPackageId}`);
+    console.log(`Checkout URL: checkout.html?package=${checkoutPackageId}`);
+    
+    // Try to redirect to checkout page
+    try {
+        window.location.href = `checkout.html?package=${checkoutPackageId}`;
+    } catch (error) {
+        console.error('Error redirecting to checkout:', error);
+        // Fallback: try to navigate using window.open
+        window.open(`checkout.html?package=${checkoutPackageId}`, '_self');
+    }
 }
 
 // Update user subscription
@@ -280,12 +306,18 @@ async function updateUserProfile(userId, packageName) {
 // Initialize pricing connector
 async function initPricingConnector() {
     try {
+        console.log('Initializing pricing connector...');
+        
         // Load packages from Supabase
         const packages = await loadSubscriptionPackages();
+        console.log('Loaded packages:', packages);
         
-        if (packages) {
+        if (packages && packages.length > 0) {
             // Map packages to pricing cards
             mapPackagesToCards(packages);
+            console.log('Pricing cards created successfully');
+        } else {
+            console.warn('No packages found or packages array is empty');
         }
     } catch (error) {
         console.error('Error initializing pricing connector:', error);
@@ -294,11 +326,34 @@ async function initPricingConnector() {
 
 // Initialize when the DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, checking for pricing section...');
+    
     // Check if we're on a page with pricing cards
     const pricingSection = document.querySelector('.pricing-section');
     if (pricingSection) {
         console.log('Pricing section found, initializing connector...');
-        initPricingConnector();
+        
+        // Wait a bit for Supabase to be ready
+        setTimeout(() => {
+            console.log('Checking Supabase availability...');
+            if (typeof supabase !== 'undefined') {
+                console.log('Supabase client available, initializing...');
+                initPricingConnector();
+            } else {
+                console.error('Supabase client not available, waiting...');
+                // Try again after a longer delay
+                setTimeout(() => {
+                    if (typeof supabase !== 'undefined') {
+                        console.log('Supabase client now available, initializing...');
+                        initPricingConnector();
+                    } else {
+                        console.error('Supabase client still not available after delay');
+                    }
+                }, 2000);
+            }
+        }, 1000);
+    } else {
+        console.log('No pricing section found on this page');
     }
 });
 
